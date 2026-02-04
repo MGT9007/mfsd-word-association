@@ -1,0 +1,627 @@
+/* ============================================================================
+   MFSD WORD ASSOCIATION - MAIN STYLESS
+   ============================================================================ */
+
+.wa-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.wa-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+
+.wa-title {
+  margin: 0 0 12px;
+  font-size: 32px;
+  color: #2c3e50;
+  font-weight: 700;
+  text-align: center;
+}
+
+.wa-subtitle {
+  margin: 0 0 28px;
+  font-size: 18px;
+  color: #7f8c8d;
+  text-align: center;
+  font-weight: 400;
+}
+
+.wa-section-title {
+  margin: 20px 0 12px;
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   WELCOME SCREEN
+   ============================================================================ */
+
+.wa-welcome {
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.wa-instructions {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  color: #2c3e50;
+}
+
+.wa-instructions h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.wa-instructions ol {
+  margin: 0 0 0 20px;
+  padding: 0;
+  line-height: 1.8;
+}
+
+.wa-instructions li {
+  margin-bottom: 8px;
+}
+
+/* ============================================================================
+   TIMER & PROGRESS
+   ============================================================================ */
+
+.wa-timer {
+  font-size: 72px;
+  font-weight: 700;
+  color: #4a90e2;
+  text-align: center;
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.wa-timer.wa-timer-low {
+  color: #f39c12;
+}
+
+.wa-timer.wa-timer-warning {
+  color: #e74c3c;
+  animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.wa-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.wa-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4a90e2 0%, #357abd 100%);
+  transition: width 1s linear;
+  border-radius: 4px;
+}
+
+/* ============================================================================
+   WORD DISPLAY
+   ============================================================================ */
+
+.wa-word-display {
+  text-align: center;
+  margin: 28px 0;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.wa-word-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.wa-word {
+  font-size: 48px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.wa-category {
+  display: inline-block;
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px auto;
+  text-align: center;
+}
+
+.wa-prompt {
+  text-align: center;
+  font-size: 16px;
+  color: #2c3e50;
+  margin: 24px 0 20px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   INPUT FIELDS
+   ============================================================================ */
+
+.wa-inputs {
+  margin: 24px 0;
+}
+
+.wa-input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.wa-input-label {
+  font-size: 20px;
+  font-weight: 600;
+  color: #4a90e2;
+  min-width: 30px;
+}
+
+.wa-input {
+  flex: 1;
+  padding: 14px 18px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.wa-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.wa-input::placeholder {
+  color: #bbb;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.wa-btn {
+  border: none;
+  background: #4a90e2;
+  color: white;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.wa-btn:hover {
+  background: #357abd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3);
+}
+
+.wa-btn:active {
+  transform: translateY(0);
+}
+
+.wa-btn.wa-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.wa-btn.wa-secondary:hover {
+  background: #e0e0e0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.wa-btn.wa-btn-large {
+  font-size: 18px;
+  padding: 16px 48px;
+}
+
+.wa-submit {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  font-size: 18px;
+  padding: 16px;
+}
+
+.wa-btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ============================================================================
+   RESULTS SCREEN
+   ============================================================================ */
+
+.wa-results {
+  max-width: 650px;
+  margin: 20px auto;
+}
+
+.wa-word-reminder {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.wa-word-reminder strong {
+  color: #667eea;
+  font-size: 22px;
+}
+
+.wa-associations-display {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.wa-assoc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wa-assoc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #4a90e2;
+}
+
+.wa-assoc-number {
+  font-weight: 700;
+  color: #4a90e2;
+  font-size: 18px;
+  min-width: 30px;
+}
+
+.wa-assoc-text {
+  flex: 1;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.wa-time-display {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin: 16px 0;
+}
+
+.wa-summary-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  margin: 24px 0;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.wa-summary-box .wa-section-title {
+  color: white;
+  margin-top: 0;
+}
+
+.wa-summary-text {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.95);
+  font-style: italic;
+}
+
+/* ============================================================================
+   HISTORY SCREEN
+   ============================================================================ */
+
+.wa-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.wa-history-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e5e5;
+  transition: all 0.2s ease;
+}
+
+.wa-history-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.wa-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.wa-history-word {
+  font-size: 24px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.wa-history-date {
+  font-size: 13px;
+  color: #999;
+}
+
+.wa-history-associations {
+  margin: 16px 0;
+}
+
+.wa-history-assoc {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.wa-history-summary {
+  margin-top: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.wa-history-summary-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wa-history-summary-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  font-style: italic;
+}
+
+.wa-empty {
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  margin: 32px 0;
+}
+
+/* ============================================================================
+   ERROR STATE
+   ============================================================================ */
+
+.wa-error {
+  background: #fee;
+  border: 2px solid #fcc;
+  border-radius: 12px;
+  padding: 20px;
+  color: #c33;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================ */
+
+.wa-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.wa-spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(255, 255, 255, 0.3);
+  border-top: 6px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.wa-loading-text {
+  color: white;
+  font-size: 18px;
+  margin-top: 24px;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .wa-wrap {
+    padding: 12px;
+  }
+
+  .wa-card {
+    padding: 24px 20px;
+  }
+
+  .wa-title {
+    font-size: 26px;
+  }
+
+  .wa-subtitle {
+    font-size: 16px;
+  }
+
+  .wa-timer {
+    font-size: 56px;
+  }
+
+  .wa-word {
+    font-size: 36px;
+  }
+
+  .wa-input {
+    font-size: 15px;
+    padding: 12px 16px;
+  }
+
+  .wa-btn-group {
+    flex-direction: column;
+  }
+
+  .wa-btn {
+    width: 100%;
+  }
+
+  .wa-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .wa-history-word {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wa-card {
+    padding: 20px 16px;
+  }
+
+  .wa-title {
+    font-size: 24px;
+  }
+
+  .wa-timer {
+    font-size: 48px;
+  }
+
+  .wa-word {
+    font-size: 28px;
+  }
+
+  .wa-word-display {
+    padding: 24px 16px;
+  }
+
+  .wa-input-label {
+    font-size: 16px;
+    min-width: 25px;
+  }
+
+  .wa-input {
+    font-size: 14px;
+  }
+
+  .wa-instructions {
+    padding: 16px;
+  }
+
+  .wa-instructions ol {
+    margin-left: 16px;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  .wa-btn,
+  .wa-btn-group,
+  .wa-timer,
+  .wa-progress-bar {
+    display: none;
+  }
+
+  .wa-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .wa-summary-box {
+    background: #f0f0f0;
+    color: #333;
+    box-shadow: none;
+  }
+
+  .wa-summary-text {
+    color: #333;
+  }
+}

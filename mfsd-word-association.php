@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -278,48 +278,28 @@ final class MFSD_Word_Association {
     }
     
     private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3) {
-        $anthropic_key = get_option('mfsd_anthropic_api_key');
-        
-        if (empty($anthropic_key)) {
-            return "AI summary unavailable. Please configure your Anthropic API key in plugin settings.";
+        // Use AI Engine (same as RAG plugin)
+        if (!isset($GLOBALS['mwai'])) {
+            return "AI Engine not available. Please install and configure the AI Engine plugin.";
         }
         
-        $prompt = "The user was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
-        $prompt .= "1. {$assoc1}\n";
-        $prompt .= "2. {$assoc2}\n";
-        $prompt .= "3. {$assoc3}\n\n";
-        $prompt .= "Based on these associations, write a brief 2-3 sentence insight about what this word means to this person or how they relate to it. Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.";
-        
-        $response = wp_remote_post('https://api.anthropic.com/v1/messages', array(
-            'headers' => array(
-                'Content-Type' => 'application/json',
-                'x-api-key' => $anthropic_key,
-                'anthropic-version' => '2023-06-01'
-            ),
-            'body' => json_encode(array(
-                'model' => 'claude-3-5-sonnet-20241022',
-                'max_tokens' => 300,
-                'messages' => array(
-                    array(
-                        'role' => 'user',
-                        'content' => $prompt
-                    )
-                )
-            )),
-            'timeout' => 30
-        ));
-        
-        if (is_wp_error($response)) {
-            return "AI summary generation failed. Please try again.";
+        try {
+            $mwai = $GLOBALS['mwai'];
+            
+            $prompt = "The user was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
+            $prompt .= "1. {$assoc1}\n";
+            $prompt .= "2. {$assoc2}\n";
+            $prompt .= "3. {$assoc3}\n\n";
+            $prompt .= "Based on these associations, write a brief 2-3 sentence insight about what this word means to this person or how they relate to it. Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.";
+            
+            $summary = $mwai->simpleTextQuery($prompt);
+            
+            return $summary;
+            
+        } catch (Exception $e) {
+            error_log('MFSD Word Association: AI summary error: ' . $e->getMessage());
+            return "I'm having trouble generating insights right now. Your associations have been saved!";
         }
-        
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-        
-        if (isset($body['content'][0]['text'])) {
-            return $body['content'][0]['text'];
-        }
-        
-        return "AI summary generation failed. Please check your API key.";
     }
     
     public function api_get_history($req) {
@@ -350,15 +330,6 @@ final class MFSD_Word_Association {
             array($this, 'admin_page'),
             'dashicons-editor-quote',
             30
-        );
-        
-        add_submenu_page(
-            'mfsd-word-assoc',
-            'Settings',
-            'Settings',
-            'manage_options',
-            'mfsd-word-assoc-settings',
-            array($this, 'settings_page')
         );
     }
     
@@ -451,46 +422,6 @@ final class MFSD_Word_Association {
         <?php
     }
     
-    public function settings_page() {
-        if (isset($_POST['action']) && $_POST['action'] === 'save_settings' && 
-            check_admin_referer('mfsd_word_assoc_settings')) {
-            
-            update_option('mfsd_anthropic_api_key', sanitize_text_field($_POST['anthropic_key']));
-            echo '<div class="notice notice-success"><p>Settings saved!</p></div>';
-        }
-        
-        $api_key = get_option('mfsd_anthropic_api_key', '');
-        
-        ?>
-        <div class="wrap">
-            <h1>Word Association Settings</h1>
-            
-            <form method="post" action="">
-                <?php wp_nonce_field('mfsd_word_assoc_settings'); ?>
-                <input type="hidden" name="action" value="save_settings">
-                
-                <table class="form-table">
-                    <tr>
-                        <th><label for="anthropic_key">Anthropic API Key</label></th>
-                        <td>
-                            <input type="password" name="anthropic_key" id="anthropic_key" 
-                                   value="<?php echo esc_attr($api_key); ?>" 
-                                   class="regular-text">
-                            <p class="description">
-                                Required for AI-generated summaries. Get your key from 
-                                <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a>
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                
-                <p class="submit">
-                    <input type="submit" class="button button-primary" value="Save Settings">
-                </p>
-            </form>
-        </div>
-        <?php
-    }
 }
 
 MFSD_Word_Association::instance();

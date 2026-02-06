@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.5';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -254,10 +254,10 @@ final class MFSD_Word_Association {
         $assoc2 = sanitize_textarea_field($req->get_param('association_2'));
         $assoc3 = sanitize_textarea_field($req->get_param('association_3'));
         $time_taken = intval($req->get_param('time_taken'));
-        $username = um_get_display_name($user_id);
+       
         
         // Generate AI summary
-        $ai_summary = $this->generate_ai_summary($word, $assoc1, $assoc2, $assoc3);
+        $ai_summary = $this->generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id);
         
         // Save to database
         $wpdb->insert($table, array(
@@ -287,23 +287,27 @@ final class MFSD_Word_Association {
         try {
             $mwai = $GLOBALS['mwai'];
             
+             $username = um_get_display_name($user_id);
+
             $prompt = "The user was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
             $prompt .= "1. {$assoc1}\n";
             $prompt .= "2. {$assoc2}\n";
             $prompt .= "3. {$assoc3}\n\n";
-            $Prompt = "===YOUR TASK===\n";
-            $Prompt .= "You are a supportive coach speaking directly to $username, a student completing a self-assessment.\n";
+            $prompt = "===YOUR TASK===\n";
+            $prompt .= "You are a supportive coach speaking directly to $username, a student completing a self-assessment.\n";
             $prompt .= "Based on these associations, Write a warm, insightful summary about what this word means to $username or how $username relates to it:\n";
             $prompt .= "Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.\n";
-            $Prompt .= "Use UK context. Use bullet points to help annotate points through the summary..\n";
-            $Prompt .= "Use Steve's Solutions Mindset principles to help emphasise a growth mindset and positive attitude throughout the summary.\n";
-            $Prompt .= "The principles are: 1.Say to yourself What is the solution to every problem I face?, 2.If you have a solutions mindset marginal gains will occur, \n";
-            $Prompt .= "3.There is no Failure only Feedback, 4.A smooth sea, never made a skilled sailor, 5.• If one person can do it, anyone can do it, \n";
-            $Prompt .= "6.Happiness is a journey, not an outcome, 7.You never lose…you either win or learn, 8.Character over Calibre is the best way to succeed, \n";
-            $Prompt .= "9.The person with the most passion has the greatest impact, 10.Hard work beats talent, when talent does not work hard,\n";
-            $Prompt .= "11.Everybody knows more than somebody, 12.Be the person your dog thinks you are, 13.It is nice to be important, but more important to be nice. \n";
+            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary..\n";
+            $prompt .= "Use Steve's Solutions Mindset principles to help emphasise a growth mindset and positive attitude throughout the summary.\n";
+            $prompt .= "The principles are: 1.Say to yourself What is the solution to every problem I face?, 2.If you have a solutions mindset marginal gains will occur, \n";
+            $prompt .= "3.There is no Failure only Feedback, 4.A smooth sea, never made a skilled sailor, 5.• If one person can do it, anyone can do it, \n";
+            $prompt .= "6.Happiness is a journey, not an outcome, 7.You never lose…you either win or learn, 8.Character over Calibre is the best way to succeed, \n";
+            $prompt .= "9.The person with the most passion has the greatest impact, 10.Hard work beats talent, when talent does not work hard,\n";
+            $prompt .= "11.Everybody knows more than somebody, 12.Be the person your dog thinks you are, 13.It is nice to be important, but more important to be nice. \n";
 
-            
+            // Actually call the AI
+            $summary = $mwai->simpleTextQuery($prompt);
+
             return $summary;
             
         } catch (Exception $e) {

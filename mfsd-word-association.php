@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.0.6';
+    const VERSION = '1.0.7';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -289,15 +289,15 @@ final class MFSD_Word_Association {
             
              $username = um_get_display_name($user_id);
 
-            $prompt = "The user was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
+            $prompt = "===YOUR TASK===\n";
+            $prompt .= "You are a supportive coach speaking directly to $username, a student completing the word association self-assessment.\n";
+            $prompt = "$username was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
             $prompt .= "1. {$assoc1}\n";
             $prompt .= "2. {$assoc2}\n";
             $prompt .= "3. {$assoc3}\n\n";
-            $prompt = "===YOUR TASK===\n";
-            $prompt .= "You are a supportive coach speaking directly to $username, a student completing a self-assessment.\n";
-            $prompt .= "Based on these associations, Write a warm, insightful summary about what $word means to $username or how $username relates to it:\n";
+            $prompt .= " Write a warm, insightful summary about the association between $word and in turn $assoc1, $assoc2, and $assoc3 and how these asccociations relate to $username:\n";
             $prompt .= "Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.\n";
-            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary..\n";
+            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary, and use age appropriate language. $username is aged between 11 - 14 years old .\n";
             // $prompt .= "Use Steve's Solutions Mindset principles to help emphasise a growth mindset and positive attitude throughout the summary.\n";
             // $prompt .= "The principles are: 1.Say to yourself What is the solution to every problem I face?, 2.If you have a solutions mindset marginal gains will occur, \n";
             // $prompt .= "3.There is no Failure only Feedback, 4.A smooth sea, never made a skilled sailor, 5.• If one person can do it, anyone can do it, \n";

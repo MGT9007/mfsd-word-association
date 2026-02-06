@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.4.0';
+    const VERSION = '1.4.1';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -409,6 +409,141 @@ final class MFSD_Word_Association {
         ?>
         <div class="wrap">
             <h1>Manage Word Association Cards</h1>
+            
+            <?php
+            // Get current settings
+            $current_mode = get_option('mfsd_wa_mode', 1);
+            $current_word_count = get_option('mfsd_wa_word_count', 1);
+            $current_selected_words = get_option('mfsd_wa_selected_words', array());
+            ?>
+            
+            <h2>Mode Settings</h2>
+            <form method="post" action="" id="mode-settings-form">
+                <?php wp_nonce_field('mfsd_word_assoc_mode_settings'); ?>
+                <input type="hidden" name="action" value="save_mode_settings">
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">Mode</th>
+                        <td>
+                            <label>
+                                <input type="radio" name="mode" value="1" <?php checked($current_mode, 1); ?> 
+                                       onchange="toggleModeSettings()">
+                                <strong>Mode 1:</strong> Random Words (Unlimited)
+                            </label>
+                            <p class="description">Users can do unlimited word associations with randomly selected active words.</p>
+                            
+                            <br><br>
+                            
+                            <label>
+                                <input type="radio" name="mode" value="2" <?php checked($current_mode, 2); ?>
+                                       onchange="toggleModeSettings()">
+                                <strong>Mode 2:</strong> Fixed Word Set (Limited)
+                            </label>
+                            <p class="description">Users complete a specific set of words (1-5) that you choose.</p>
+                        </td>
+                    </tr>
+                    
+                    <tr id="word-count-row" style="display: <?php echo $current_mode == 2 ? 'table-row' : 'none'; ?>;">
+                        <th scope="row"><label for="word_count">Number of Words</label></th>
+                        <td>
+                            <select name="word_count" id="word_count" onchange="updateWordPicker()">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php selected($current_word_count, $i); ?>>
+                                        <?php echo $i; ?> Word<?php echo $i > 1 ? 's' : ''; ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                            <p class="description">Select how many words users must complete in Mode 2.</p>
+                        </td>
+                    </tr>
+                    
+                    <tr id="word-picker-row" style="display: <?php echo $current_mode == 2 ? 'table-row' : 'none'; ?>;">
+                        <th scope="row">Select Words</th>
+                        <td>
+                            <p class="description" style="margin-top: 0;">Choose exactly <span id="required-count"><?php echo $current_word_count; ?></span> word(s):</p>
+                            <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f9f9f9;">
+                                <?php foreach ($words as $word): ?>
+                                    <?php if ($word->active): ?>
+                                        <label style="display: block; margin: 5px 0;">
+                                            <input type="checkbox" name="selected_words[]" value="<?php echo $word->id; ?>"
+                                                   <?php echo in_array($word->id, $current_selected_words) ? 'checked' : ''; ?>
+                                                   class="word-checkbox">
+                                            <strong><?php echo esc_html($word->word); ?></strong>
+                                            <?php if ($word->category): ?>
+                                                <span style="color: #666;">(<?php echo esc_html($word->category); ?>)</span>
+                                            <?php endif; ?>
+                                        </label>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                            <p class="description" id="selection-status"></p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p class="submit">
+                    <input type="submit" class="button button-primary" value="Save Mode Settings" id="save-mode-btn">
+                </p>
+            </form>
+            
+            <script>
+            function toggleModeSettings() {
+                const mode = document.querySelector('input[name="mode"]:checked').value;
+                const wordCountRow = document.getElementById('word-count-row');
+                const wordPickerRow = document.getElementById('word-picker-row');
+                
+                if (mode == '2') {
+                    wordCountRow.style.display = 'table-row';
+                    wordPickerRow.style.display = 'table-row';
+                    updateWordPicker();
+                } else {
+                    wordCountRow.style.display = 'none';
+                    wordPickerRow.style.display = 'none';
+                }
+            }
+            
+            function updateWordPicker() {
+                const requiredCount = document.getElementById('word_count').value;
+                document.getElementById('required-count').textContent = requiredCount;
+                updateSelectionStatus();
+            }
+            
+            function updateSelectionStatus() {
+                const checkboxes = document.querySelectorAll('.word-checkbox:checked');
+                const required = parseInt(document.getElementById('word_count').value);
+                const selected = checkboxes.length;
+                const status = document.getElementById('selection-status');
+                const saveBtn = document.getElementById('save-mode-btn');
+                
+                if (document.querySelector('input[name="mode"]:checked').value == '1') {
+                    saveBtn.disabled = false;
+                    status.textContent = '';
+                    return;
+                }
+                
+                if (selected < required) {
+                    status.innerHTML = '<span style="color: #d63638;">⚠️ Please select ' + (required - selected) + ' more word(s)</span>';
+                    saveBtn.disabled = true;
+                } else if (selected > required) {
+                    status.innerHTML = '<span style="color: #d63638;">⚠️ Too many selected! Please unselect ' + (selected - required) + ' word(s)</span>';
+                    saveBtn.disabled = true;
+                } else {
+                    status.innerHTML = '<span style="color: #00a32a;">✓ Perfect! ' + selected + ' word(s) selected</span>';
+                    saveBtn.disabled = false;
+                }
+            }
+            
+            // Add listeners to checkboxes
+            document.querySelectorAll('.word-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateSelectionStatus);
+            });
+            
+            // Initialize on load
+            updateSelectionStatus();
+            </script>
+            
+            <hr style="margin: 30px 0;">
             
             <h2>Add New Word</h2>
             <form method="post" action="">

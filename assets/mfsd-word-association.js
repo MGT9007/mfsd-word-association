@@ -100,19 +100,40 @@
     const title = el('h1', 'wa-title', 'Word Association');
     const subtitle = el('p', 'wa-subtitle', 'Discover what words mean to you');
     
+    const mode = cfg.mode || 1;
+    const wordCount = cfg.wordCount || 1;
+    
     const instructions = el('div', 'wa-instructions');
-    instructions.innerHTML = `
-      <h3>How it works:</h3>
-      <ol>
-        <li>You'll see a word appear on screen</li>
-        <li>You have <strong>${TIMER_DURATION} seconds</strong> to type 3 associations</li>
-        <li>Write the first things that come to mind - there are no wrong answers</li>
-        <li>Our AI will analyze your responses and provide insights</li>
-      </ol>
-      <p style="margin-top: 20px; color: #666; font-size: 14px;">
-        💡 <em>Tip: Don't overthink it! Your immediate reactions are the most revealing.</em>
-      </p>
-    `;
+    
+    if (mode === 2) {
+      // Mode 2: Fixed word set
+      instructions.innerHTML = `
+        <h3>How it works:</h3>
+        <ol>
+          <li>You'll complete <strong>${wordCount} word association${wordCount > 1 ? 's' : ''}</strong></li>
+          <li>For each word, you have <strong>${TIMER_DURATION} seconds</strong> to type 3 associations</li>
+          <li>Write the first things that come to mind - there are no wrong answers</li>
+          <li>Our AI will analyze your responses and provide insights</li>
+        </ol>
+        <p style="margin-top: 20px; color: #666; font-size: 14px;">
+          💡 <em>Tip: Don't overthink it! Your immediate reactions are the most revealing.</em>
+        </p>
+      `;
+    } else {
+      // Mode 1: Random unlimited
+      instructions.innerHTML = `
+        <h3>How it works:</h3>
+        <ol>
+          <li>You'll see a word appear on screen</li>
+          <li>You have <strong>${TIMER_DURATION} seconds</strong> to type 3 associations</li>
+          <li>Write the first things that come to mind - there are no wrong answers</li>
+          <li>Our AI will analyze your responses and provide insights</li>
+        </ol>
+        <p style="margin-top: 20px; color: #666; font-size: 14px;">
+          💡 <em>Tip: Don't overthink it! Your immediate reactions are the most revealing.</em>
+        </p>
+      `;
+    }
 
     const startBtn = el('button', 'wa-btn wa-btn-large', 'Start');
     startBtn.onclick = loadWord;
@@ -327,6 +348,13 @@
 
     const title = el('h2', 'wa-title', 'Your Insights');
     card.appendChild(title);
+    
+    // Progress indicator for Mode 2
+    if (currentMode === 2 && totalWords > 1) {
+      const progress = el('div', 'wa-progress-indicator');
+      progress.innerHTML = `<p style="text-align: center; color: #666; font-size: 14px; margin: -10px 0 20px;">Question ${completedWords + 1} of ${totalWords}</p>`;
+      card.appendChild(progress);
+    }
 
     // Word reminder
     const wordReminder = el('div', 'wa-word-reminder');
@@ -370,18 +398,53 @@
     // Action buttons
     const btnGroup = el('div', 'wa-btn-group');
     
-    const nextBtn = el('button', 'wa-btn', 'Next Word');
-    nextBtn.onclick = loadWord;
-    
-    const historyBtn = el('button', 'wa-btn wa-secondary', 'View History');
-    historyBtn.onclick = showHistory;
-    
-    //const homeBtn = el('button', 'wa-btn wa-secondary', 'Home');
-    //homeBtn.onclick = showWelcome;
-    
-    btnGroup.appendChild(nextBtn);
-    btnGroup.appendChild(historyBtn);
-    //btnGroup.appendChild(homeBtn);
+    // Mode 1: Always show both buttons
+    // Mode 2: Conditional based on progress
+    if (currentMode === 1) {
+      // Mode 1: Unlimited - always show both buttons
+      const nextBtn = el('button', 'wa-btn', 'Next Word');
+      nextBtn.onclick = loadWord;
+      btnGroup.appendChild(nextBtn);
+      
+      const historyBtn = el('button', 'wa-btn wa-secondary', 'View History');
+      historyBtn.onclick = showHistory;
+      btnGroup.appendChild(historyBtn);
+      
+    } else if (currentMode === 2) {
+      // Mode 2: Fixed set - conditional buttons
+      const hasMore = (completedWords + 1) < totalWords;
+      const hasMultiple = totalWords >= 2;
+      const completedMultiple = (completedWords + 1) >= 2;
+      
+      // Show Next Word button if: word count is 2+ AND not all complete
+      if (hasMultiple && hasMore) {
+        const nextBtn = el('button', 'wa-btn', 'Next Word');
+        nextBtn.onclick = loadWord;
+        btnGroup.appendChild(nextBtn);
+      }
+      
+      // Show View History button if: word count is 2-5 AND completed 2+ associations
+      if (hasMultiple && completedMultiple) {
+        const historyBtn = el('button', 'wa-btn wa-secondary', 'View History');
+        historyBtn.onclick = showHistory;
+        btnGroup.appendChild(historyBtn);
+      }
+      
+      // If all complete, show completion message
+      if (!hasMore) {
+        const completeMsg = el('div', 'wa-complete-message');
+        completeMsg.innerHTML = '<h3 style="color: #00a32a; text-align: center; margin-top: 20px;">🎉 All Complete!</h3><p style="text-align: center; color: #666;">You\'ve completed all ' + totalWords + ' word associations.</p>';
+        card.appendChild(completeMsg);
+        
+        // Only show View History button if they completed multiple words
+        if (totalWords >= 2) {
+          const historyBtn = el('button', 'wa-btn', 'View Your History');
+          historyBtn.onclick = showHistory;
+          historyBtn.style.cssText = 'display: block; margin: 20px auto 0;';
+          card.appendChild(historyBtn);
+        }
+      }
+    }
     
     card.appendChild(btnGroup);
 

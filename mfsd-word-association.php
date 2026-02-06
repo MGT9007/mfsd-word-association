@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.2.0';
+    const VERSION = '1.2.1';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -274,7 +274,7 @@ final class MFSD_Word_Association {
         ));
     }
     
-    private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3) {
+    private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id) {
         // Use AI Engine (same as RAG plugin)
         if (!isset($GLOBALS['mwai'])) {
             return "AI Engine not available. Please install and configure the AI Engine plugin.";

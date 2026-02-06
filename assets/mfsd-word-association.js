@@ -65,8 +65,29 @@
   // ==================== MAIN FLOW ====================
 
   async function init() {
+  // Check if user has any previous associations
+  const loading = showLoading('Loading...');
+  
+  try {
+    const data = await apiCall('history?limit=1');
+    hideLoading(loading);
+    
+    if (data.history && data.history.length > 0) {
+      // User has history - show their last result
+      const last = data.history[0];
+      currentWord = { word: last.word, id: last.card_id };
+      timeElapsed = last.time_taken;
+      showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+    } else {
+      // New user - show welcome screen
+      showWelcome();
+    }
+  } catch (err) {
+    hideLoading(loading);
+    // If error checking history, just show welcome
     showWelcome();
   }
+}
 
   function showWelcome() {
     const wrap = el('div', 'wa-wrap');
@@ -342,12 +363,12 @@
     const historyBtn = el('button', 'wa-btn wa-secondary', 'View History');
     historyBtn.onclick = showHistory;
     
-    const homeBtn = el('button', 'wa-btn wa-secondary', 'Home');
-    homeBtn.onclick = showWelcome;
+    //const homeBtn = el('button', 'wa-btn wa-secondary', 'Home');
+    //homeBtn.onclick = showWelcome;
     
     btnGroup.appendChild(nextBtn);
     btnGroup.appendChild(historyBtn);
-    btnGroup.appendChild(homeBtn);
+    //btnGroup.appendChild(homeBtn);
     
     card.appendChild(btnGroup);
 
@@ -419,7 +440,18 @@
     }
 
     const backBtn = el('button', 'wa-btn wa-secondary', 'Back');
-    backBtn.onclick = showWelcome;
+    backBtn.onclick = () => {
+    // Go back to most recent result if exists, otherwise welcome
+    if (history.length > 0) {
+      const last = history[0];
+      currentWord = { word: last.word, id: last.card_id };
+      timeElapsed = last.time_taken;
+      showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+    } else {
+      showWelcome();
+    }
+    };
+
     card.appendChild(backBtn);
 
     wrap.appendChild(card);

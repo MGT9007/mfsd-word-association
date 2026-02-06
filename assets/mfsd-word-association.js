@@ -334,6 +334,13 @@
         time_taken: timeElapsed
       });
       
+      // Update mode variables from response
+      if (data.mode) {
+        currentMode = data.mode;
+        totalWords = data.total_words || 0;
+        completedWords = data.completed || 0;
+      }
+      
       hideLoading(loading);
       showResults(assoc1, assoc2, assoc3, data.summary);
     } catch (err) {

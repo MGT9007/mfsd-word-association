@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.5.1';
+    const VERSION = '1.5.2';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -311,9 +311,22 @@ final class MFSD_Word_Association {
             'created_at' => current_time('mysql')
         ));
         
+        // Get mode settings and progress
+        $mode = get_option('mfsd_wa_mode', 1);
+        $selected_words = get_option('mfsd_wa_selected_words', array());
+        
+        // Calculate completed count
+        $completed_ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT DISTINCT card_id FROM $table WHERE user_id = %d",
+            $user_id
+        ));
+        
         return rest_ensure_response(array(
             'success' => true,
-            'summary' => $ai_summary
+            'summary' => $ai_summary,
+            'mode' => $mode,
+            'total_words' => $mode == 2 ? count($selected_words) : null,
+            'completed' => $mode == 2 ? count($completed_ids) : null
         ));
     }
     

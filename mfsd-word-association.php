@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.3.1
+ * Version: 1.4.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.3.1';
+    const VERSION = '1.4.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -334,21 +334,6 @@ final class MFSD_Word_Association {
             'history' => $history
         ));
     }
-    
-    // Handle mode settings save
-    if (isset($_POST['action']) && $_POST['action'] === 'save_mode_settings' && 
-        check_admin_referer('mfsd_word_assoc_mode_settings')) {
-        
-        $mode = intval($_POST['mode']); // 1 or 2
-        $word_count = intval($_POST['word_count']); // 1-5
-        $selected_words = isset($_POST['selected_words']) ? array_map('intval', $_POST['selected_words']) : array();
-        
-        update_option('mfsd_wa_mode', $mode);
-        update_option('mfsd_wa_word_count', $word_count);
-        update_option('mfsd_wa_selected_words', $selected_words);
-        
-        echo '<div class="notice notice-success"><p>Mode settings saved successfully!</p></div>';
-    }
 
     public function admin_menu() {
         add_menu_page(
@@ -365,6 +350,21 @@ final class MFSD_Word_Association {
     public function admin_page() {
         global $wpdb;
         $cards_table = $wpdb->prefix . self::TBL_CARDS;
+        
+        // Handle mode settings save
+        if (isset($_POST['action']) && $_POST['action'] === 'save_mode_settings' && 
+            check_admin_referer('mfsd_word_assoc_mode_settings')) {
+            
+            $mode = intval($_POST['mode']); // 1 or 2
+            $word_count = intval($_POST['word_count']); // 1-5
+            $selected_words = isset($_POST['selected_words']) ? array_map('intval', $_POST['selected_words']) : array();
+            
+            update_option('mfsd_wa_mode', $mode);
+            update_option('mfsd_wa_word_count', $word_count);
+            update_option('mfsd_wa_selected_words', $selected_words);
+            
+            echo '<div class="notice notice-success"><p>Mode settings saved successfully!</p></div>';
+        }
         
         // Handle add word
         if (isset($_POST['action']) && $_POST['action'] === 'add_word' && 

@@ -6,6 +6,10 @@
 
   const TIMER_DURATION = cfg.timer || 20; // 20 seconds defaults
   
+  // NEW: Mode tracking
+  let currentMode = 1; // 1 = random unlimited, 2 = fixed set
+  let totalWords = 0; // Total words in Mode 2
+  let completedWords = 0; // Completed words in Mode 2
   let currentWord = null;
   let timer = null;
   let timeRemaining = TIMER_DURATION;
@@ -135,11 +139,20 @@
     try {
       const data = await apiCall(`word?category=${encodeURIComponent(cfg.category || '')}`);
       currentWord = data.word;
+      currentMode = data.mode || 1;           // ← NEW LINE
+      totalWords = data.total_words || 0;      // ← NEW LINE
+      completedWords = data.completed || 0;    // ← NEW LINE
       hideLoading(loading);
       startAssociation();
     } catch (err) {
       hideLoading(loading);
-      showError('Failed to load word. Please try again.');
+      
+      // Check if all words complete in Mode 2        // ← NEW SECTION
+      if (err.message && err.message.includes('All words completed')) {
+        showAllComplete();
+      } else {
+        showError('Failed to load word. Please try again.');
+      }
     }
   }
 
@@ -458,6 +471,27 @@
     root.replaceChildren(wrap);
   }
 
+ function showAllComplete() {
+    const wrap = el('div', 'wa-wrap');
+    const card = el('div', 'wa-card');
+    
+    const title = el('h1', 'wa-title', '🎉 Congratulations!');
+    card.appendChild(title);
+    
+    const message = el('div', 'wa-complete-message');
+    message.innerHTML = '<p style="font-size: 18px; text-align: center; line-height: 1.6;">You\'ve completed all word associations!</p>';
+    message.style.cssText = 'text-align: center; padding: 20px; background: #d4edda; border-radius: 8px; margin: 20px 0;';
+    card.appendChild(message);
+    
+    const historyBtn = el('button', 'wa-btn', 'View Your History');
+    historyBtn.onclick = showHistory;
+    historyBtn.style.cssText = 'display: block; margin: 0 auto;';
+    card.appendChild(historyBtn);
+    
+    wrap.appendChild(card);
+    root.replaceChildren(wrap);
+  }
+
   function showError(message) {
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card');
@@ -472,6 +506,8 @@
     wrap.appendChild(card);
     root.replaceChildren(wrap);
   }
+
+  
 
   // ==================== INITIALIZATION ====================
   init();

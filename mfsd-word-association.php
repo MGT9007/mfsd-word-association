@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.0.10
+ * Version: 1.2.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.0.10';
+    const VERSION = '1.2.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -218,29 +218,25 @@ final class MFSD_Word_Association {
     }
     
     public function api_get_word($req) {
-        global $wpdb;
-        $table = $wpdb->prefix . self::TBL_CARDS;
-        
-        $category = sanitize_text_field($req->get_param('category'));
-        
-        $where = "active = 1";
-        if (!empty($category)) {
-            $where .= $wpdb->prepare(" AND category = %s", $category);
-        }
-        
-        // Get random word
-        $word = $wpdb->get_row(
-            "SELECT * FROM $table WHERE $where ORDER BY RAND() LIMIT 1"
-        );
-        
-        if (!$word) {
-            return new WP_Error('no_words', 'No words available', array('status' => 404));
-        }
-        
-        return rest_ensure_response(array(
-            'success' => true,
-            'word' => $word
-        ));
+    // Get mode settings
+    $mode = get_option('mfsd_wa_mode', 1);
+    $selected_words = get_option('mfsd_wa_selected_words', array());
+    
+    if ($mode == 2 && !empty($selected_words)) {
+        // Mode 2: Return next uncompleted word from list
+        // Gets completed words, finds remaining, returns next
+    } else {
+        // Mode 1: Random selection
+    }
+    
+    // Include mode info in response
+    return rest_ensure_response(array(
+        'success' => true,
+        'word' => $word,
+        'mode' => $mode,
+        'total_words' => $mode == 2 ? count($selected_words) : null,
+        'completed' => $mode == 2 ? count($completed_ids) : null
+    ));
     }
     
     public function api_save_associations($req) {
@@ -339,6 +335,21 @@ final class MFSD_Word_Association {
         ));
     }
     
+    // Handle mode settings save
+    if (isset($_POST['action']) && $_POST['action'] === 'save_mode_settings' && 
+        check_admin_referer('mfsd_word_assoc_mode_settings')) {
+        
+        $mode = intval($_POST['mode']); // 1 or 2
+        $word_count = intval($_POST['word_count']); // 1-5
+        $selected_words = isset($_POST['selected_words']) ? array_map('intval', $_POST['selected_words']) : array();
+        
+        update_option('mfsd_wa_mode', $mode);
+        update_option('mfsd_wa_word_count', $word_count);
+        update_option('mfsd_wa_selected_words', $selected_words);
+        
+        echo '<div class="notice notice-success"><p>Mode settings saved successfully!</p></div>';
+    }
+
     public function admin_menu() {
         add_menu_page(
             'Word Association',

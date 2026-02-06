@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.0.8';
+    const VERSION = '1.0.9';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -301,7 +301,7 @@ final class MFSD_Word_Association {
             $prompt .= "write a paragrpah on the association between $word and  $assoc3:\n";
             $prompt .= "write a final conclusive paragrpah on the overall associations between $word and in turn $assoc1, $assoc2, and $assoc3 and how these asccociations relate to $username:\n";
             $prompt .= "Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.\n";
-            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary, use you and your, speak to $username directly. Use age appropriate language. $username is aged between 11 - 14 years old .\n";
+            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary, use a line space between paragraphs, use you and your, speak to $username directly. Use age appropriate language. $username is aged between 11 - 14 years old .\n";
             // $prompt .= "Use Steve's Solutions Mindset principles to help emphasise a growth mindset and positive attitude throughout the summary.\n";
             // $prompt .= "The principles are: 1.Say to yourself What is the solution to every problem I face?, 2.If you have a solutions mindset marginal gains will occur, \n";
             // $prompt .= "3.There is no Failure only Feedback, 4.A smooth sea, never made a skilled sailor, 5.• If one person can do it, anyone can do it, \n";
@@ -368,6 +368,23 @@ final class MFSD_Word_Association {
             echo '<div class="notice notice-success"><p>Word added successfully!</p></div>';
         }
         
+        // Handle toggle active/inactive
+        if (isset($_GET['toggle']) && check_admin_referer('mfsd_word_assoc_toggle_' . $_GET['toggle'])) {
+            $word_id = intval($_GET['toggle']);
+            $current = $wpdb->get_var($wpdb->prepare(
+                "SELECT active FROM $cards_table WHERE id = %d",
+                $word_id
+            ));
+            $new_status = $current ? 0 : 1;
+            $wpdb->update(
+                $cards_table,
+                array('active' => $new_status),
+                array('id' => $word_id)
+            );
+            $status_text = $new_status ? 'activated' : 'deactivated';
+            echo '<div class="notice notice-success"><p>Word ' . $status_text . ' successfully!</p></div>';
+        }
+
         // Handle delete
         if (isset($_GET['delete']) && check_admin_referer('mfsd_word_assoc_delete_' . $_GET['delete'])) {
             $wpdb->delete($cards_table, array('id' => intval($_GET['delete'])));
@@ -424,13 +441,23 @@ final class MFSD_Word_Association {
                 </thead>
                 <tbody>
                     <?php foreach ($words as $word): ?>
-                        <tr>
+                       <tr style="<?php echo !$word->active ? 'opacity: 0.5;' : ''; ?>">
                             <td><strong><?php echo esc_html($word->word); ?></strong></td>
                             <td><?php echo esc_html($word->category ?: '—'); ?></td>
-                            <td><?php echo $word->active ? 'Active' : 'Inactive'; ?></td>
                             <td>
+                                <span style="<?php echo $word->active ? 'color: green;' : 'color: gray;'; ?>">
+                                    <?php echo $word->active ? '✓ Active' : '✗ Inactive'; ?>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="?page=mfsd-word-assoc&toggle=<?php echo $word->id; ?>&_wpnonce=<?php echo wp_create_nonce('mfsd_word_assoc_toggle_' . $word->id); ?>" 
+                                style="margin-right: 10px;">
+                                    <?php echo $word->active ? 'Deactivate' : 'Activate'; ?>
+                                </a>
+                                |
                                 <a href="?page=mfsd-word-assoc&delete=<?php echo $word->id; ?>&_wpnonce=<?php echo wp_create_nonce('mfsd_word_assoc_delete_' . $word->id); ?>" 
-                                   onclick="return confirm('Delete this word?')">Delete</a>
+                                onclick="return confirm('Delete this word?')"
+                                style="color: #a00; margin-left: 10px;">Delete</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

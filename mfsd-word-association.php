@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.4.1
+ * Version: 1.5.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.4.1';
+    const VERSION = '1.5.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -182,7 +182,9 @@ final class MFSD_Word_Association {
             'restUrl' => $rest_url,
             'nonce' => $nonce,
             'category' => $atts['category'],
-            'timer' => intval($atts['timer'])
+            'timer' => intval($atts['timer']),
+            'mode' => get_option('mfsd_wa_mode', 1),
+            'wordCount' => get_option('mfsd_wa_word_count', 1)
         ));
         
         return '<div id="mfsd-word-assoc-root"></div>';
@@ -218,25 +220,66 @@ final class MFSD_Word_Association {
     }
     
     public function api_get_word($req) {
-    // Get mode settings
-    $mode = get_option('mfsd_wa_mode', 1);
-    $selected_words = get_option('mfsd_wa_selected_words', array());
-    
-    if ($mode == 2 && !empty($selected_words)) {
-        // Mode 2: Return next uncompleted word from list
-        // Gets completed words, finds remaining, returns next
-    } else {
-        // Mode 1: Random selection
-    }
-    
-    // Include mode info in response
-    return rest_ensure_response(array(
-        'success' => true,
-        'word' => $word,
-        'mode' => $mode,
-        'total_words' => $mode == 2 ? count($selected_words) : null,
-        'completed' => $mode == 2 ? count($completed_ids) : null
-    ));
+        global $wpdb;
+        $table = $wpdb->prefix . self::TBL_CARDS;
+        $user_id = get_current_user_id();
+        
+        // Get mode settings
+        $mode = get_option('mfsd_wa_mode', 1);
+        $selected_words = get_option('mfsd_wa_selected_words', array());
+        
+        if ($mode == 2 && !empty($selected_words)) {
+            // Mode 2: Return next word from selected list that user hasn't completed
+            $assoc_table = $wpdb->prefix . self::TBL_ASSOCIATIONS;
+            
+            // Get words user has already completed
+            $completed_ids = $wpdb->get_col($wpdb->prepare(
+                "SELECT DISTINCT card_id FROM $assoc_table WHERE user_id = %d",
+                $user_id
+            ));
+            
+            // Find first word in selected list that hasn't been completed
+            $remaining = array_diff($selected_words, $completed_ids);
+            
+            if (empty($remaining)) {
+                return new WP_Error('all_complete', 'All words completed', array('status' => 404));
+            }
+            
+            // Get the next word from remaining
+            $next_id = reset($remaining);
+            $word = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $table WHERE id = %d",
+                $next_id
+            ));
+            
+        } else {
+            // Mode 1: Random selection from active words
+            $category = sanitize_text_field($req->get_param('category'));
+            
+            $where = "active = 1";
+            if (!empty($category)) {
+                $where .= $wpdb->prepare(" AND category = %s", $category);
+            }
+            
+            $word = $wpdb->get_row(
+                "SELECT * FROM $table WHERE $where ORDER BY RAND() LIMIT 1"
+            );
+            
+            $completed_ids = array(); // Not used in Mode 1
+        }
+        
+        if (!$word) {
+            return new WP_Error('no_words', 'No words available', array('status' => 404));
+        }
+        
+        // Include mode info in response
+        return rest_ensure_response(array(
+            'success' => true,
+            'word' => $word,
+            'mode' => $mode,
+            'total_words' => $mode == 2 ? count($selected_words) : null,
+            'completed' => $mode == 2 ? count($completed_ids) : null
+        ));
     }
     
     public function api_save_associations($req) {

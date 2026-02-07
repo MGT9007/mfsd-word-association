@@ -366,10 +366,20 @@
     card.appendChild(title);
     
     // Progress indicator for Mode 2
+    console.log('Progress check:', {
+      'currentMode === 2': currentMode === 2,
+      'totalWords > 1': totalWords > 1,
+      'typeof currentMode': typeof currentMode,
+      'typeof totalWords': typeof totalWords
+    });
+    
     if (currentMode === 2 && totalWords > 1) {
+      console.log('Creating progress indicator...');
       const progress = el('div', 'wa-progress-indicator');
       progress.innerHTML = `<p style="text-align: center; color: #666; font-size: 14px; margin: -10px 0 20px;">Question ${completedWords + 1} of ${totalWords}</p>`;
       card.appendChild(progress);
+    } else {
+      console.log('Progress indicator NOT created');
     }
 
     // Word reminder

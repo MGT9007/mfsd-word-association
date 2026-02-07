@@ -111,7 +111,7 @@
     
     const instructions = el('div', 'wa-instructions');
     
-    if (mode === 2) {
+    if (mode == 2) {
       // Mode 2: Fixed word set
       instructions.innerHTML = `
         <h3>How it works:</h3>
@@ -356,9 +356,6 @@
   }
 
   function showResults(assoc1, assoc2, assoc3, summary) {
-    // DEBUG: Log mode variables
-    console.log('showResults called with mode:', currentMode, 'total:', totalWords, 'completed:', completedWords);
-    
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card wa-results');
 
@@ -366,20 +363,10 @@
     card.appendChild(title);
     
     // Progress indicator for Mode 2
-    console.log('Progress check:', {
-      'currentMode === 2': currentMode === 2,
-      'totalWords > 1': totalWords > 1,
-      'typeof currentMode': typeof currentMode,
-      'typeof totalWords': typeof totalWords
-    });
-    
-    if (currentMode === 2 && totalWords > 1) {
-      console.log('Creating progress indicator...');
+    if (currentMode == 2 && totalWords > 1) {
       const progress = el('div', 'wa-progress-indicator');
-      progress.innerHTML = `<p style="text-align: center; color: #666; font-size: 14px; margin: -10px 0 20px;">Question ${completedWords + 1} of ${totalWords}</p>`;
+      progress.innerHTML = `<p style="text-align: center; color: #666; font-size: 14px; margin: -10px 0 20px;">Question ${completedWords} of ${totalWords}</p>`;
       card.appendChild(progress);
-    } else {
-      console.log('Progress indicator NOT created');
     }
 
     // Word reminder
@@ -426,7 +413,7 @@
     
     // Mode 1: Always show both buttons
     // Mode 2: Conditional based on progress
-    if (currentMode === 1) {
+    if (currentMode == 1) {
       // Mode 1: Unlimited - always show both buttons
       const nextBtn = el('button', 'wa-btn', 'Next Word');
       nextBtn.onclick = loadWord;
@@ -436,7 +423,7 @@
       historyBtn.onclick = showHistory;
       btnGroup.appendChild(historyBtn);
       
-    } else if (currentMode === 2) {
+    } else if (currentMode == 2) {
       // Mode 2: Fixed set - conditional buttons
       const hasMore = (completedWords + 1) < totalWords;
       const hasMultiple = totalWords >= 2;

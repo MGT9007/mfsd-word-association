@@ -356,6 +356,9 @@
   }
 
   function showResults(assoc1, assoc2, assoc3, summary) {
+    // DEBUG: Log mode variables
+    console.log('showResults called with mode:', currentMode, 'total:', totalWords, 'completed:', completedWords);
+    
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card wa-results');
 

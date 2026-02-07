@@ -425,9 +425,9 @@
       
     } else if (currentMode == 2) {
       // Mode 2: Fixed set - conditional buttons
-      const hasMore = (completedWords + 1) < totalWords;
+      const hasMore = completedWords < totalWords;
       const hasMultiple = totalWords >= 2;
-      const completedMultiple = (completedWords + 1) >= 2;
+      const completedMultiple = completedWords >= 2;
       
       // Show Next Word button if: word count is 2+ AND not all complete
       if (hasMultiple && hasMore) {
@@ -443,23 +443,26 @@
         btnGroup.appendChild(historyBtn);
       }
       
-      // If all complete, show completion message
+      // If all complete, show completion message (DON'T add button to btnGroup)
       if (!hasMore) {
         const completeMsg = el('div', 'wa-complete-message');
         completeMsg.innerHTML = '<h3 style="color: #00a32a; text-align: center; margin-top: 20px;">🎉 All Complete!</h3><p style="text-align: center; color: #666;">You\'ve completed all ' + totalWords + ' word associations.</p>';
         card.appendChild(completeMsg);
         
-        // Only show View History button if they completed multiple words
+        // Show single View History button outside of btnGroup
         if (totalWords >= 2) {
-          const historyBtn = el('button', 'wa-btn', 'View Your History');
-          historyBtn.onclick = showHistory;
-          historyBtn.style.cssText = 'display: block; margin: 20px auto 0;';
-          card.appendChild(historyBtn);
+          const soloHistoryBtn = el('button', 'wa-btn', 'View Your History');
+          soloHistoryBtn.onclick = showHistory;
+          soloHistoryBtn.style.cssText = 'display: block; margin: 20px auto 0;';
+          card.appendChild(soloHistoryBtn);
         }
       }
     }
     
-    card.appendChild(btnGroup);
+    // Only append btnGroup if it has buttons
+    if (btnGroup.children.length > 0) {
+      card.appendChild(btnGroup);
+    }
 
     wrap.appendChild(card);
     root.replaceChildren(wrap);

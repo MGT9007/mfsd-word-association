@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.5.6
+ * Version: 1.5.7
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.5.6';
+    const VERSION = '1.5.7';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';

@@ -362,6 +362,14 @@
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.95);
   font-style: italic;
+  white-space: pre-line; /* Preserves line breaks from \n */
+}
+
+.wa-summary-text strong,
+.wa-summary-text b {
+  font-weight: 700;
+  color: #fff;
+  font-style: normal;
 }
 
 /* ============================================================================

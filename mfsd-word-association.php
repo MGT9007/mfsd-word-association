@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.5.9
+ * Version: 1.5.10
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.5.9';
+    const VERSION = '1.5.10';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -344,40 +344,49 @@ final class MFSD_Word_Association {
             
             $username = um_get_display_name($user_id);
 
-            $prompt = "You are a warm, supportive coach speaking directly to {$username}, a student aged 11-14 completing a word association self-assessment.\n\n";
+            $prompt = "You are a warm, supportive coach speaking directly to {$username}, a student aged 11-14.\n\n";
             
-            $prompt .= "### Context:\n";
-            $prompt .= "{$username} was shown the word \"{$word}\" and provided these 3 quick associations:\n";
+            $prompt .= "{$username} saw the word \"{$word}\" and gave these associations:\n";
             $prompt .= "1. {$assoc1}\n";
             $prompt .= "2. {$assoc2}\n";
             $prompt .= "3. {$assoc3}\n\n";
             
-            $prompt .= "### Your Task:\n";
-            $prompt .= "Write a warm, insightful summary using this EXACT structure:\n\n";
+            $prompt .= "Write a summary with this EXACT structure (use double line breaks between each section):\n\n";
             
-            $prompt .= "**Opening paragraph:** Brief introduction acknowledging {$username}'s associations and what you'll explore.\n\n";
+            $prompt .= "SECTION 1 (Introduction - 1-2 sentences):\n";
+            $prompt .= "Briefly welcome {$username} and mention you'll explore their associations.\n\n";
             
-            $prompt .= "**\"{$word} and {$assoc1}\":** Write 2-3 sentences exploring this connection. What does this association reveal about {$username}'s perspective or experience?\n\n";
+            $prompt .= "SECTION 2 (Association 1 - 2-3 sentences):\n";
+            $prompt .= "Start with: **\"{$word} and {$assoc1}\":**\n";
+            $prompt .= "Explore what this connection reveals about {$username}'s perspective.\n\n";
             
-            $prompt .= "**\"{$word} and {$assoc2}\":** Write 2-3 sentences exploring this connection. How does this add depth to understanding {$username}'s view?\n\n";
+            $prompt .= "SECTION 3 (Association 2 - 2-3 sentences):\n";
+            $prompt .= "Start with: **\"{$word} and {$assoc2}\":**\n";
+            $prompt .= "Explore what this connection reveals.\n\n";
             
-            $prompt .= "**\"{$word} and {$assoc3}\":** Write 2-3 sentences exploring this connection. What additional insight does this provide?\n\n";
+            $prompt .= "SECTION 4 (Association 3 - 2-3 sentences):\n";
+            $prompt .= "Start with: **\"{$word} and {$assoc3}\":**\n";
+            $prompt .= "Explore what this connection reveals.\n\n";
             
-            $prompt .= "**Conclusion:** Write a 3-4 sentence concluding paragraph that ties all three associations together, showing the bigger picture of how {$username} relates to \"{$word}\".\n\n";
+            $prompt .= "SECTION 5 (Conclusion - 3-4 sentences):\n";
+            $prompt .= "Tie all three together showing the bigger picture of how {$username} relates to \"{$word}\".\n\n";
             
-            $prompt .= "### Style Guidelines:\n";
-            $prompt .= "- Use 'you' and 'your' throughout - speak directly to {$username}\n";
-            $prompt .= "- Be empathetic, thoughtful, and specific\n";
-            $prompt .= "- Focus on emotional and personal connections, not dictionary definitions\n";
-            $prompt .= "- Use age-appropriate language for 11-14 year olds\n";
-            $prompt .= "- Use UK spelling and context\n";
-            $prompt .= "- Keep each section concise - this is meant to be read on mobile\n";
-            $prompt .= "- Be encouraging and growth-focused\n\n";
+            $prompt .= "CRITICAL FORMATTING RULES:\n";
+            $prompt .= "- Use TWO line breaks (\\n\\n) between each section\n";
+            $prompt .= "- Bold the association headers like: **\"Communication and excellent\":**\n";
+            $prompt .= "- Use 'you' and 'your' - speak directly to {$username}\n";
+            $prompt .= "- Keep each section short (mobile-friendly)\n";
+            $prompt .= "- Age-appropriate language for 11-14 year olds\n";
+            $prompt .= "- UK spelling and context\n";
+            $prompt .= "- Be warm, encouraging, and growth-focused\n\n";
             
-            $prompt .= "Do NOT include section headers in your response - just write the content with clear paragraph breaks between each section.";
+            $prompt .= "Start writing now:";
 
             // Actually call the AI
             $summary = $mwai->simpleTextQuery($prompt);
+            
+            // Post-process to ensure proper formatting
+            $summary = $this->format_ai_summary($summary, $word, $assoc1, $assoc2, $assoc3);
 
             return $summary;
             
@@ -385,6 +394,46 @@ final class MFSD_Word_Association {
             error_log('MFSD Word Association: AI summary error: ' . $e->getMessage());
             return "I'm having trouble generating insights right now. Your associations have been saved!";
         }
+    }
+    
+    private function format_ai_summary($summary, $word, $assoc1, $assoc2, $assoc3) {
+        // Clean up AI response to ensure proper formatting
+        
+        // Remove any ### headers if present
+        $summary = preg_replace('/^###\s+.*$/m', '', $summary);
+        
+        // Ensure bold markers use ** not just *
+        $summary = preg_replace('/\*([^*]+)\*/', '**$1**', $summary);
+        
+        // Try to identify sections and add line breaks
+        // Look for patterns like "Communication and excellent" or bold headers
+        $patterns = [
+            "/(\*\*\"$word and [^\"]+\"\*\*:)/i",
+            "/(\*\*$word and [^:]+:\*\*)/i",
+            "/(When you associate)/i",
+            "/(Linking \"$word\")/i",
+            "/(Bringing all)/i",
+            "/(In conclusion)/i"
+        ];
+        
+        foreach ($patterns as $pattern) {
+            $summary = preg_replace($pattern, "\n\n$1", $summary);
+        }
+        
+        // Ensure association headers are bold if they're not already
+        $summary = preg_replace(
+            "/\"$word and ($assoc1|$assoc2|$assoc3)\":/i",
+            "**\"$word and $1\":**",
+            $summary
+        );
+        
+        // Clean up excessive line breaks (more than 2 in a row)
+        $summary = preg_replace("/\n{3,}/", "\n\n", $summary);
+        
+        // Trim whitespace
+        $summary = trim($summary);
+        
+        return $summary;
     }
     
     public function api_get_history($req) {

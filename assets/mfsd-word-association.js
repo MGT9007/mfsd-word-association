@@ -402,7 +402,7 @@
 
     // AI Summary
     const summaryBox = el('div', 'wa-summary-box');
-    const summaryTitle = el('h3', 'wa-section-title', '🤖 AI Insight:');
+    const summaryTitle = el('h3', 'wa-section-title', '💬 Steve Says:');
     const summaryText = el('div', 'wa-summary-text', summary);
     summaryBox.appendChild(summaryTitle);
     summaryBox.appendChild(summaryText);
@@ -516,7 +516,7 @@
         `;
         
         const summary = el('div', 'wa-history-summary');
-        const summaryLabel = el('div', 'wa-history-summary-label', 'AI Insight:');
+        const summaryLabel = el('div', 'wa-history-summary-label', 'Steve Says:');
         const summaryText = el('div', 'wa-history-summary-text', item.ai_summary || 'No summary generated');
         summary.appendChild(summaryLabel);
         summary.appendChild(summaryText);

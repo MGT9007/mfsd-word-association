@@ -453,6 +453,18 @@
   font-style: italic;
 }
 
+.wa-history-summary-text strong {
+  font-weight: 700;
+  color: #333;
+  font-style: normal;
+}
+
+.wa-history-summary-text br {
+  display: block;
+  content: "";
+  margin: 0.5em 0;
+}
+
 .wa-empty {
   text-align: center;
   color: #999;

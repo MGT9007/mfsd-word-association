@@ -65,6 +65,18 @@
       throw err;
     }
   }
+  
+  function formatSummaryForDisplay(text) {
+    if (!text) return 'No summary generated';
+    
+    // Convert **bold** to <strong>bold</strong>
+    text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert line breaks to <br>
+    text = text.replace(/\n/g, '<br>');
+    
+    return text;
+  }
 
   // ==================== MAIN FLOW ====================
 
@@ -517,7 +529,9 @@
         
         const summary = el('div', 'wa-history-summary');
         const summaryLabel = el('div', 'wa-history-summary-label', 'Steve Says:');
-        const summaryText = el('div', 'wa-history-summary-text', item.ai_summary || 'No summary generated');
+        const summaryText = el('div', 'wa-history-summary-text');
+        // Use formatting helper to preserve bold and line breaks
+        summaryText.innerHTML = formatSummaryForDisplay(item.ai_summary);
         summary.appendChild(summaryLabel);
         summary.appendChild(summaryText);
         

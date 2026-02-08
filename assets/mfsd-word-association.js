@@ -436,20 +436,20 @@
         btnGroup.appendChild(nextBtn);
       }
       
-      // Show View History button if: word count is 2-5 AND completed 2+ associations
-      if (hasMultiple && completedMultiple) {
+      // Show View History button if: word count is 2-5 AND completed 2+ associations AND still more to do
+      if (hasMultiple && completedMultiple && hasMore) {
         const historyBtn = el('button', 'wa-btn wa-secondary', 'View History');
         historyBtn.onclick = showHistory;
         btnGroup.appendChild(historyBtn);
       }
       
-      // If all complete, show completion message (DON'T add button to btnGroup)
+      // If all complete, show completion message with single history button
       if (!hasMore) {
         const completeMsg = el('div', 'wa-complete-message');
         completeMsg.innerHTML = '<h3 style="color: #00a32a; text-align: center; margin-top: 20px;">🎉 All Complete!</h3><p style="text-align: center; color: #666;">You\'ve completed all ' + totalWords + ' word associations.</p>';
         card.appendChild(completeMsg);
         
-        // Show single View History button outside of btnGroup
+        // Show single View History button
         if (totalWords >= 2) {
           const soloHistoryBtn = el('button', 'wa-btn', 'View Your History');
           soloHistoryBtn.onclick = showHistory;

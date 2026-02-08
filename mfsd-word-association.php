@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.5.8
+ * Version: 1.5.9
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.5.8';
+    const VERSION = '1.5.9';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -315,6 +315,9 @@ final class MFSD_Word_Association {
         $mode = get_option('mfsd_wa_mode', 1);
         $selected_words = get_option('mfsd_wa_selected_words', array());
         
+        // DEBUG
+        error_log('SAVE API DEBUG - mode: ' . $mode . ', selected_words: ' . json_encode($selected_words) . ', count: ' . count($selected_words));
+        
         // Calculate completed count
         $completed_ids = $wpdb->get_col($wpdb->prepare(
             "SELECT DISTINCT card_id FROM $table WHERE user_id = %d",
@@ -339,27 +342,39 @@ final class MFSD_Word_Association {
         try {
             $mwai = $GLOBALS['mwai'];
             
-             $username = um_get_display_name($user_id);
+            $username = um_get_display_name($user_id);
 
-            $prompt = "===YOUR TASK===\n";
-            $prompt .= "You are a supportive coach speaking directly to $username, a student completing the word association self-assessment.\n";
-            $prompt = "$username was shown the word \"{$word}\" and asked to quickly provide 3 word associations. They responded with:\n\n";
+            $prompt = "You are a warm, supportive coach speaking directly to {$username}, a student aged 11-14 completing a word association self-assessment.\n\n";
+            
+            $prompt .= "### Context:\n";
+            $prompt .= "{$username} was shown the word \"{$word}\" and provided these 3 quick associations:\n";
             $prompt .= "1. {$assoc1}\n";
             $prompt .= "2. {$assoc2}\n";
             $prompt .= "3. {$assoc3}\n\n";
-            $prompt .= " Write a warm, insightful summary:\n";
-            $prompt .= "write a paragrpah on the association between $word and  $assoc1:\n";
-            $prompt .= "write a paragrpah on the association between $word and  $assoc2:\n";
-            $prompt .= "write a paragrpah on the association between $word and  $assoc3:\n";
-            $prompt .= "write a final conclusive paragrpah on the overall associations between $word and in turn $assoc1, $assoc2, and $assoc3 and how these asccociations relate to $username:\n";
-            $prompt .= "Be empathetic, thoughtful, and specific. Focus on the emotional or personal connection rather than dictionary definitions.\n";
-            $prompt .= "Use UK context. Use bullet points to help annotate points through the summary, use a line space between paragraphs, use you and your, speak to $username directly. Use age appropriate language. $username is aged between 11 - 14 years old .\n";
-            // $prompt .= "Use Steve's Solutions Mindset principles to help emphasise a growth mindset and positive attitude throughout the summary.\n";
-            // $prompt .= "The principles are: 1.Say to yourself What is the solution to every problem I face?, 2.If you have a solutions mindset marginal gains will occur, \n";
-            // $prompt .= "3.There is no Failure only Feedback, 4.A smooth sea, never made a skilled sailor, 5.• If one person can do it, anyone can do it, \n";
-            // $prompt .= "6.Happiness is a journey, not an outcome, 7.You never lose…you either win or learn, 8.Character over Calibre is the best way to succeed, \n";
-            // $prompt .= "9.The person with the most passion has the greatest impact, 10.Hard work beats talent, when talent does not work hard,\n";
-            // $prompt .= "11.Everybody knows more than somebody, 12.Be the person your dog thinks you are, 13.It is nice to be important, but more important to be nice. \n";
+            
+            $prompt .= "### Your Task:\n";
+            $prompt .= "Write a warm, insightful summary using this EXACT structure:\n\n";
+            
+            $prompt .= "**Opening paragraph:** Brief introduction acknowledging {$username}'s associations and what you'll explore.\n\n";
+            
+            $prompt .= "**\"{$word} and {$assoc1}\":** Write 2-3 sentences exploring this connection. What does this association reveal about {$username}'s perspective or experience?\n\n";
+            
+            $prompt .= "**\"{$word} and {$assoc2}\":** Write 2-3 sentences exploring this connection. How does this add depth to understanding {$username}'s view?\n\n";
+            
+            $prompt .= "**\"{$word} and {$assoc3}\":** Write 2-3 sentences exploring this connection. What additional insight does this provide?\n\n";
+            
+            $prompt .= "**Conclusion:** Write a 3-4 sentence concluding paragraph that ties all three associations together, showing the bigger picture of how {$username} relates to \"{$word}\".\n\n";
+            
+            $prompt .= "### Style Guidelines:\n";
+            $prompt .= "- Use 'you' and 'your' throughout - speak directly to {$username}\n";
+            $prompt .= "- Be empathetic, thoughtful, and specific\n";
+            $prompt .= "- Focus on emotional and personal connections, not dictionary definitions\n";
+            $prompt .= "- Use age-appropriate language for 11-14 year olds\n";
+            $prompt .= "- Use UK spelling and context\n";
+            $prompt .= "- Keep each section concise - this is meant to be read on mobile\n";
+            $prompt .= "- Be encouraging and growth-focused\n\n";
+            
+            $prompt .= "Do NOT include section headers in your response - just write the content with clear paragraph breaks between each section.";
 
             // Actually call the AI
             $summary = $mwai->simpleTextQuery($prompt);

@@ -69,15 +69,28 @@
   function formatSummaryForDisplay(text) {
     if (!text) return 'No summary generated';
     
-    // Handle multiple asterisk patterns for bold
+    // Clean up malformed asterisks patterns
+    // Fix patterns like ":***" or ":**" at end of headers
+    text = text.replace(/:\*+/g, ':**');
+    
+    // Fix patterns like "***:" where asterisks come before colon
+    text = text.replace(/\*+:/g, '**:');
+    
+    // Handle multiple asterisk patterns for bold (process longest first)
+    // Convert ****text**** to <strong>text</strong>
+    text = text.replace(/\*{4,}([^*]+)\*{4,}/g, '<strong>$1</strong>');
+    
     // Convert ***text*** to <strong>text</strong>
     text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong>$1</strong>');
     
     // Convert **text** to <strong>text</strong>
     text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     
-    // Convert *text* to <em>text</em> (italic, if any single asterisks remain)
+    // Convert *text* to <em>text</em> (italic)
     text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // Clean up any remaining stray asterisks
+    text = text.replace(/\*+/g, '');
     
     // Convert line breaks to <br>
     text = text.replace(/\n/g, '<br>');

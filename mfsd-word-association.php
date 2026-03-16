@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '2.0.0';
+    const VERSION = '2.1.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -176,7 +176,10 @@ final class MFSD_Word_Association {
             $status     = mfsd_get_task_status( $student_id, 'word_association' );
 
             if ( $status === 'locked' ) {
-                return mfsd_ordering_locked_message( 'word_association' );
+                if ( function_exists( 'mfsd_ordering_locked_message' ) ) {
+                    return mfsd_ordering_locked_message( 'word_association' );
+                }
+                return '<p style="text-align:center;padding:40px;color:#555;">This activity is not available yet. Please complete the previous activity first.</p>';
             }
 
             if ( $status === 'available' ) {

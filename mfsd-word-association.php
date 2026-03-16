@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 1.5.14
+ * Version: 2.0.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '1.5.14';
+    const VERSION = '2.0.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -169,7 +169,25 @@ final class MFSD_Word_Association {
         if (!is_user_logged_in()) {
             return '<p class="wa-error">Please log in to play word association.</p>';
         }
-        
+
+        // ── Ordering gate ──────────────────────────────────────────────────
+        if ( function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
+            $student_id = get_current_user_id();
+            $status     = mfsd_get_task_status( $student_id, 'word_association' );
+
+            if ( $status === 'locked' ) {
+                return mfsd_ordering_locked_message( 'word_association' );
+            }
+
+            if ( $status === 'available' ) {
+                // First visit — mark as started
+                mfsd_set_task_status( $student_id, 'word_association', 'in_progress' );
+            }
+            // 'in_progress', 'completed', 'not_configured' — all fall through,
+            // existing JS history logic handles the completed display.
+        }
+        // ── End ordering gate ──────────────────────────────────────────────
+
         wp_enqueue_style('mfsd-word-assoc-css');
         wp_enqueue_script('mfsd-word-assoc-js');
         
@@ -324,6 +342,25 @@ final class MFSD_Word_Association {
             $user_id
         ));
         
+        // ── Notify ordering system ─────────────────────────────────────────
+        if ( function_exists( 'mfsd_set_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
+            $is_complete = false;
+            if ( $mode == 2 ) {
+                // Mode 2: complete only when ALL selected words have been done
+                $is_complete = count( $completed_ids ) >= count( $selected_words );
+            } else {
+                // Mode 1: unlimited — first completed word unlocks the next task
+                $is_complete = true;
+            }
+            if ( $is_complete ) {
+                mfsd_set_task_status( $user_id, 'word_association', 'completed' );
+            } else {
+                // Ensure in_progress is set if not already
+                mfsd_set_task_status( $user_id, 'word_association', 'in_progress' );
+            }
+        }
+        // ── End ordering notification ──────────────────────────────────────
+
         return rest_ensure_response(array(
             'success' => true,
             'summary' => $ai_summary,
@@ -491,10 +528,12 @@ final class MFSD_Word_Association {
             $mode = intval($_POST['mode']); // 1 or 2
             $word_count = intval($_POST['word_count']); // 1-5
             $selected_words = isset($_POST['selected_words']) ? array_map('intval', $_POST['selected_words']) : array();
+            $course_management = isset($_POST['course_management']) ? 1 : 0;
             
             update_option('mfsd_wa_mode', $mode);
             update_option('mfsd_wa_word_count', $word_count);
             update_option('mfsd_wa_selected_words', $selected_words);
+            update_option('mfsd_wa_course_management', $course_management);
             
             echo '<div class="notice notice-success"><p>Mode settings saved successfully!</p></div>';
         }
@@ -534,6 +573,29 @@ final class MFSD_Word_Association {
             $wpdb->delete($cards_table, array('id' => intval($_GET['delete'])));
             echo '<div class="notice notice-success"><p>Word deleted!</p></div>';
         }
+
+        // Handle reset student answers
+        if (isset($_POST['action']) && $_POST['action'] === 'reset_student' &&
+            check_admin_referer('mfsd_word_assoc_reset_student')) {
+
+            $reset_user_id = intval($_POST['reset_user_id']);
+            if ($reset_user_id > 0) {
+                $assoc_table = $wpdb->prefix . self::TBL_ASSOCIATIONS;
+                $wpdb->delete($assoc_table, array('user_id' => $reset_user_id));
+
+                // Also clear their ordering progress for this task
+                if (function_exists('mfsd_get_task_order_row')) {
+                    $wpdb->delete(
+                        $wpdb->prefix . 'mfsd_task_progress',
+                        array('student_id' => $reset_user_id, 'task_slug' => 'word_association')
+                    );
+                }
+
+                $reset_user = get_user_by('id', $reset_user_id);
+                $name = $reset_user ? $reset_user->display_name : 'Student';
+                echo '<div class="notice notice-success"><p>' . esc_html($name) . '\'s Word Association answers and progress have been reset.</p></div>';
+            }
+        }
         
         // Get all words
         $words = $wpdb->get_results("SELECT * FROM $cards_table ORDER BY category, word");
@@ -548,6 +610,7 @@ final class MFSD_Word_Association {
             $current_mode = get_option('mfsd_wa_mode', 1);
             $current_word_count = get_option('mfsd_wa_word_count', 1);
             $current_selected_words = get_option('mfsd_wa_selected_words', array());
+            $current_cm = get_option('mfsd_wa_course_management', 1);
             ?>
             
             <h2>Mode Settings</h2>
@@ -557,6 +620,22 @@ final class MFSD_Word_Association {
                 
                 <table class="form-table">
                     <tr>
+                        <th scope="row">Course Management</th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="course_management" value="1"
+                                       <?php checked($current_cm, 1); ?>>
+                                <strong>Enable course ordering &amp; completion tracking</strong>
+                            </label>
+                            <p class="description">
+                                When <strong>on</strong>: task locking, in-progress and completion states are tracked via MFSD Course Manager.<br>
+                                When <strong>off</strong>: ordering logic is bypassed entirely — useful for testing and configuration.
+                                <?php if (!function_exists('mfsd_get_task_status')): ?>
+                                    <br><span style="color:#d63638;">⚠️ MFSD Ordering Utility plugin is not active.</span>
+                                <?php endif; ?>
+                            </p>
+                        </td>
+                    </tr>
                         <th scope="row">Mode</th>
                         <td>
                             <label>
@@ -742,6 +821,67 @@ final class MFSD_Word_Association {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <hr>
+            
+            <h2>Reset Student Answers</h2>
+            <p class="description">
+                Deletes a student's Word Association answers and resets their course progress for this task back to <em>not started</em>.
+                Use this during testing or if a student needs to redo the activity.
+            </p>
+            <?php
+            // Get students who have at least one association record
+            $assoc_table = $wpdb->prefix . self::TBL_ASSOCIATIONS;
+            $students_with_data = $wpdb->get_results(
+                "SELECT DISTINCT a.user_id, u.display_name
+                 FROM $assoc_table a
+                 JOIN {$wpdb->users} u ON u.ID = a.user_id
+                 ORDER BY u.display_name ASC"
+            );
+            ?>
+            <?php if (empty($students_with_data)): ?>
+                <p style="color:#999;">No students have completed any Word Associations yet.</p>
+            <?php else: ?>
+            <form method="post" action=""
+                  onsubmit="return confirm('This will permanently delete all Word Association answers for this student and reset their progress. Are you sure?');">
+                <?php wp_nonce_field('mfsd_word_assoc_reset_student'); ?>
+                <input type="hidden" name="action" value="reset_student">
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="reset_user_id">Select Student</label></th>
+                        <td>
+                            <select name="reset_user_id" id="reset_user_id" style="min-width:240px;">
+                                <option value="">— select a student —</option>
+                                <?php foreach ($students_with_data as $s): ?>
+                                    <?php
+                                    // Show how many associations they have
+                                    $count = $wpdb->get_var($wpdb->prepare(
+                                        "SELECT COUNT(*) FROM $assoc_table WHERE user_id = %d",
+                                        $s->user_id
+                                    ));
+                                    // Show their current ordering status if available
+                                    $order_status = '';
+                                    if (function_exists('mfsd_get_task_status')) {
+                                        $order_status = ' — ' . mfsd_get_task_status($s->user_id, 'word_association');
+                                    }
+                                    ?>
+                                    <option value="<?php echo esc_attr($s->user_id); ?>">
+                                        <?php echo esc_html($s->display_name); ?>
+                                        (<?php echo $count; ?> association<?php echo $count != 1 ? 's' : ''; ?><?php echo esc_html($order_status); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="submit">
+                    <input type="submit" class="button button-secondary" value="Reset Selected Student"
+                           style="color:#d63638; border-color:#d63638;">
+                </p>
+            </form>
+            <?php endif; ?>
+
         </div>
         <?php
     }

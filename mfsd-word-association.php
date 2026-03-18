@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '2.1.0';
+    const VERSION = '2.1.1';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -382,7 +382,8 @@ final class MFSD_Word_Association {
         try {
             $mwai = $GLOBALS['mwai'];
             
-            $username = um_get_display_name($user_id);
+            $user = get_userdata($user_id);
+            $username = $user ? $user->display_name : 'Student';
 
             $prompt = "You are a warm, supportive coach speaking directly to {$username}, a student aged 11-14.\n\n";
             

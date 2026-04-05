@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 2.1.1
+ * Version: 3.0.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '2.1.1';
+    const VERSION = '3.0.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -374,14 +374,20 @@ final class MFSD_Word_Association {
     }
     
     private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id) {
-        // Use AI Engine (same as RAG plugin)
-        if (!isset($GLOBALS['mwai'])) {
-            return "AI Engine not available. Please install and configure the AI Engine plugin.";
+        // Try SteveGPT first, fall back to MWAI
+        $ai_engine = null;
+        
+        if (isset($GLOBALS['stevegpt'])) {
+            $ai_engine = $GLOBALS['stevegpt'];
+            error_log('Word Association: Using SteveGPT');
+        } elseif (isset($GLOBALS['mwai'])) {
+            $ai_engine = $GLOBALS['mwai'];
+            error_log('Word Association: Using MWAI (fallback)');
+        } else {
+            return "AI Engine not available. Please install and configure SteveGPT or AI Engine plugin.";
         }
         
         try {
-            $mwai = $GLOBALS['mwai'];
-            
             $user = get_userdata($user_id);
             $username = $user ? $user->display_name : 'Student';
 
@@ -424,7 +430,7 @@ final class MFSD_Word_Association {
             $prompt .= "Start writing now:";
 
             // Actually call the AI
-            $summary = $mwai->simpleTextQuery($prompt);
+            $summary = $ai_engine->simpleTextQuery($prompt);
             
             // Post-process to ensure proper formatting
             $summary = $this->format_ai_summary($summary, $word, $assoc1, $assoc2, $assoc3);

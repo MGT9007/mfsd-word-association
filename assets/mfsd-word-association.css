@@ -1,503 +1,587 @@
-/* ============================================================================
-   MFSD WORD ASSOCIATION - MAIN STYLESS
-   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Nunito:wght@400;600&display=swap');
 
+/* ── Gamer theme variables ───────────────────────────────────────────── */
+.wa-wrap {
+  --bg-page:        #0A0E1A;
+  --bg-card:        #0F1628;
+  --bg-inner:       #0A0E1A;
+  --accent:         #00D4FF;
+  --accent-hover:   #33DDFF;
+  --accent-2:       #9333EA;
+  --accent-2-hover: #7C3AED;
+  --accent-3:       #FFD000;
+  --text:           #E8EAF0;
+  --text-light:     #F5F5F5;
+  --text-muted:     #888888;
+  --border:         rgba(0, 212, 255, 0.38);
+  --border-dim:     rgba(0, 212, 255, 0.15);
+  --rule:           rgba(221, 221, 221, 0.12);
+  --glow-cyan:      0 0 12px rgba(0, 212, 255, 0.2);
+  --glow-cyan-md:   0 0 8px rgba(0, 212, 255, 0.25);
+  --glow-purple:    0 0 14px rgba(147, 51, 234, 0.45);
+  --font-heading:   'Exo 2', sans-serif;
+  --font-body:      'Nunito', sans-serif;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────── */
 .wa-wrap {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text);
+  border-radius: 14px;
 }
 
 .wa-card {
-  background: white;
-  border: 1px solid #e5e5e5;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 28px 30px;
+  box-shadow: var(--glow-cyan);
 }
 
-/* ============================================================================
-   TYPOGRAPHY
-   ============================================================================ */
-
+/* ── Typography ──────────────────────────────────────────────────────── */
 .wa-title {
-  margin: 0 0 12px;
-  font-size: 32px;
-  color: #2c3e50;
+  margin: 0 0 10px;
+  font-family: var(--font-heading);
+  font-size: 30px;
   font-weight: 700;
   text-align: center;
+  color: var(--accent-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .wa-subtitle {
-  margin: 0 0 28px;
-  font-size: 18px;
-  color: #7f8c8d;
+  margin: 0 0 24px;
+  font-size: 16px;
+  color: var(--text-muted);
   text-align: center;
-  font-weight: 400;
+  font-family: var(--font-body);
 }
 
 .wa-section-title {
-  margin: 20px 0 12px;
-  font-size: 18px;
-  color: #2c3e50;
-  font-weight: 600;
+  margin: 18px 0 10px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* ============================================================================
-   WELCOME SCREEN
-   ============================================================================ */
-
+/* ── Welcome screen ──────────────────────────────────────────────────── */
 .wa-welcome {
   max-width: 600px;
-  margin: 40px auto;
+  margin: 0 auto;
 }
 
 .wa-instructions {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 24px;
-  margin: 24px 0;
-  color: #2c3e50;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 20px 0;
+  color: var(--text);
 }
 
 .wa-instructions h3 {
-  margin: 0 0 16px;
-  font-size: 18px;
-  color: #2c3e50;
+  margin: 0 0 14px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .wa-instructions ol {
   margin: 0 0 0 20px;
   padding: 0;
-  line-height: 1.8;
+  line-height: 1.9;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
 }
 
 .wa-instructions li {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-/* ============================================================================
-   TIMER & PROGRESS
-   ============================================================================ */
+.wa-instructions strong {
+  color: var(--accent-3);
+}
 
+.wa-instructions em {
+  color: var(--text-muted);
+}
+
+/* ── Timer ───────────────────────────────────────────────────────────── */
 .wa-timer {
+  font-family: var(--font-heading);
   font-size: 72px;
   font-weight: 700;
-  color: #4a90e2;
+  color: var(--accent);
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   font-variant-numeric: tabular-nums;
   transition: color 0.3s ease;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
 }
 
 .wa-timer.wa-timer-low {
-  color: #f39c12;
+  color: #F59E0B;
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
 }
 
 .wa-timer.wa-timer-warning {
-  color: #e74c3c;
-  animation: pulse 1s ease infinite;
+  color: #FF4C6A;
+  text-shadow: 0 0 20px rgba(255, 76, 106, 0.4);
+  animation: wa-pulse 1s ease infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+@keyframes wa-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
 }
 
+/* ── Progress bar ────────────────────────────────────────────────────── */
 .wa-progress-bar {
   width: 100%;
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
+  height: 6px;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .wa-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4a90e2 0%, #357abd 100%);
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
   transition: width 1s linear;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
-/* ============================================================================
-   WORD DISPLAY
-   ============================================================================ */
-
+/* ── Word display ────────────────────────────────────────────────────── */
 .wa-word-display {
   text-align: center;
-  margin: 28px 0;
-  padding: 32px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  margin: 24px 0;
+  padding: 30px 24px;
+  background: var(--bg-inner);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--glow-cyan);
 }
 
 .wa-word-label {
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 12px;
+  font-family: var(--font-heading);
+  font-size: 12px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
 }
 
 .wa-word {
+  font-family: var(--font-heading);
   font-size: 48px;
   font-weight: 700;
-  color: white;
+  color: var(--accent-3);
   line-height: 1.2;
   word-wrap: break-word;
+  text-shadow: 0 0 24px rgba(255, 208, 0, 0.3);
 }
 
 .wa-category {
   display: inline-block;
-  background: rgba(102, 126, 234, 0.15);
-  color: #667eea;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 12px;
   font-weight: 600;
-  margin: 12px auto;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 12px auto 0;
   text-align: center;
 }
 
 .wa-prompt {
   text-align: center;
-  font-size: 16px;
-  color: #2c3e50;
-  margin: 24px 0 20px;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 20px 0 16px;
 }
 
-/* ============================================================================
-   INPUT FIELDS
-   ============================================================================ */
-
+/* ── Inputs ──────────────────────────────────────────────────────────── */
 .wa-inputs {
-  margin: 24px 0;
+  margin: 20px 0;
 }
 
 .wa-input-group {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   gap: 12px;
 }
 
 .wa-input-label {
-  font-size: 20px;
-  font-weight: 600;
-  color: #4a90e2;
-  min-width: 30px;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 28px;
 }
 
 .wa-input {
   flex: 1;
-  padding: 14px 18px;
-  font-size: 16px;
-  border: 2px solid #e0e0e0;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-dim);
   border-radius: 10px;
+  color: var(--text);
   outline: none;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .wa-input:focus {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  border-color: var(--accent);
+  box-shadow: var(--glow-cyan-md);
 }
 
 .wa-input::placeholder {
-  color: #bbb;
+  color: var(--text-muted);
 }
 
-/* ============================================================================
-   BUTTONS
-   ============================================================================ */
-
+/* ── Buttons ─────────────────────────────────────────────────────────── */
 .wa-btn {
-  border: none;
-  background: #4a90e2;
-  color: white;
-  border-radius: 12px;
-  padding: 14px 32px;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  padding: 12px 28px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-block;
-  text-align: center;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 100ms ease;
+  background: var(--accent-2);
+  border: 1px solid var(--accent-2);
+  color: var(--text-light);
 }
 
 .wa-btn:hover {
-  background: #357abd;
+  background: var(--accent-2-hover);
+  box-shadow: var(--glow-purple);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3);
 }
 
 .wa-btn:active {
-  transform: translateY(0);
+  transform: scale(0.97) translateY(0);
 }
 
 .wa-btn.wa-secondary {
-  background: #f5f5f5;
-  color: #333;
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
 }
 
 .wa-btn.wa-secondary:hover {
-  background: #e0e0e0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background: rgba(0, 212, 255, 0.1);
+  box-shadow: var(--glow-cyan-md);
+  transform: translateY(-2px);
 }
 
 .wa-btn.wa-btn-large {
-  font-size: 18px;
-  padding: 16px 48px;
+  font-size: 16px;
+  padding: 14px 44px;
 }
 
 .wa-submit {
   display: block;
   width: 100%;
-  margin-top: 24px;
-  font-size: 18px;
-  padding: 16px;
+  margin-top: 20px;
+  font-size: 16px;
+  padding: 14px;
 }
 
 .wa-btn-group {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 20px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-/* ============================================================================
-   RESULTS SCREEN
-   ============================================================================ */
-
+/* ── Results screen ──────────────────────────────────────────────────── */
 .wa-results {
   max-width: 650px;
-  margin: 20px auto;
+  margin: 0 auto;
 }
 
 .wa-word-reminder {
   text-align: center;
-  font-size: 18px;
-  color: #666;
-  margin-bottom: 24px;
-  padding: 12px;
-  background: #f8f9fa;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-dim);
   border-radius: 8px;
 }
 
 .wa-word-reminder strong {
-  color: #667eea;
-  font-size: 22px;
+  font-family: var(--font-heading);
+  color: var(--accent-3);
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .wa-associations-display {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 16px 0;
 }
 
 .wa-assoc-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .wa-assoc-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: white;
+  padding: 10px 14px;
+  background: var(--bg-card);
   border-radius: 8px;
-  border-left: 4px solid #4a90e2;
+  border-left: 3px solid var(--accent);
 }
 
 .wa-assoc-number {
+  font-family: var(--font-heading);
   font-weight: 700;
-  color: #4a90e2;
-  font-size: 18px;
-  min-width: 30px;
+  color: var(--accent);
+  font-size: 16px;
+  min-width: 28px;
 }
 
 .wa-assoc-text {
   flex: 1;
-  font-size: 16px;
-  color: #2c3e50;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
 }
 
 .wa-time-display {
   text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin: 16px 0;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  margin: 14px 0;
 }
 
+.wa-time-display strong {
+  color: var(--accent);
+}
+
+/* AI summary box */
 .wa-summary-box {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 24px;
-  border-radius: 12px;
-  margin: 24px 0;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  background: var(--bg-inner);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin: 20px 0;
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.15);
 }
 
 .wa-summary-box .wa-section-title {
-  color: white;
+  color: var(--accent-2);
   margin-top: 0;
 }
 
 .wa-summary-text {
-  font-size: 16px;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.95);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
   font-style: italic;
-  white-space: pre-line; /* Preserves line breaks from \n */
+  white-space: pre-line;
 }
 
 .wa-summary-text strong,
 .wa-summary-text b {
   font-weight: 700;
-  color: #fff;
+  color: var(--accent-3);
   font-style: normal;
 }
 
-/* ============================================================================
-   HISTORY SCREEN
-   ============================================================================ */
-
+/* ── History screen ──────────────────────────────────────────────────── */
 .wa-history-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin: 24px 0;
+  gap: 14px;
+  margin: 20px 0;
 }
 
 .wa-history-card {
-  background: #f8f9fa;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-dim);
   border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e5e5e5;
-  transition: all 0.2s ease;
+  padding: 18px 20px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .wa-history-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--glow-cyan-md);
 }
 
 .wa-history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid var(--rule);
 }
 
 .wa-history-word {
-  font-size: 24px;
+  font-family: var(--font-heading);
+  font-size: 22px;
   font-weight: 700;
-  color: #667eea;
+  color: var(--accent-3);
 }
 
 .wa-history-date {
-  font-size: 13px;
-  color: #999;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .wa-history-associations {
-  margin: 16px 0;
+  margin: 14px 0;
 }
 
 .wa-history-assoc {
-  padding: 8px 12px;
+  padding: 7px 12px;
   margin-bottom: 6px;
-  background: white;
-  border-radius: 6px;
+  background: var(--bg-card);
+  border-left: 2px solid var(--border);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--font-body);
   font-size: 14px;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .wa-history-summary {
-  margin-top: 16px;
-  padding: 16px;
-  background: white;
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--bg-card);
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 3px solid var(--accent-2);
 }
 
 .wa-history-summary-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #667eea;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-2);
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .wa-history-summary-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #555;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .wa-history-summary-text strong {
   font-weight: 700;
-  color: #333;
+  color: var(--accent-3);
   font-style: normal;
 }
 
-.wa-history-summary-text br {
-  display: block;
-  content: "";
-  margin: 0.5em 0;
-}
-
+/* ── Empty / error states ────────────────────────────────────────────── */
 .wa-empty {
   text-align: center;
-  color: #999;
-  font-size: 16px;
-  margin: 32px 0;
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  font-size: 15px;
+  margin: 28px 0;
 }
 
-/* ============================================================================
-   ERROR STATE
-   ============================================================================ */
-
 .wa-error {
-  background: #fee;
-  border: 2px solid #fcc;
-  border-radius: 12px;
-  padding: 20px;
-  color: #c33;
-  font-weight: 500;
-  margin-bottom: 20px;
+  background: rgba(255, 76, 106, 0.1);
+  border: 1px solid rgba(255, 76, 106, 0.4);
+  border-radius: 10px;
+  padding: 18px;
+  font-family: var(--font-body);
+  color: #FF8FA3;
+  font-weight: 600;
+  margin-bottom: 18px;
   text-align: center;
 }
 
-/* ============================================================================
-   LOADING OVERLAY
-   ============================================================================ */
+/* ── Complete message ────────────────────────────────────────────────── */
+.wa-complete-message {
+  text-align: center;
+  padding: 16px;
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  margin: 16px 0;
+}
 
+.wa-complete-message h3 {
+  font-family: var(--font-heading);
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+}
+
+.wa-complete-message p {
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Progress indicator */
+.wa-progress-indicator p {
+  font-family: var(--font-heading);
+  color: var(--accent) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Loading overlay ─────────────────────────────────────────────────── */
 .wa-loading-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 14, 26, 0.88);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -506,142 +590,65 @@
 }
 
 .wa-spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid rgba(255, 255, 255, 0.3);
-  border-top: 6px solid white;
+  width: 56px;
+  height: 56px;
+  border: 4px solid rgba(0, 212, 255, 0.15);
+  border-top: 4px solid var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: wa-spin 0.9s linear infinite;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.3);
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
+@keyframes wa-spin {
+  0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 .wa-loading-text {
-  color: white;
-  font-size: 18px;
-  margin-top: 24px;
+  font-family: var(--font-heading);
+  color: var(--text);
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 20px;
 }
 
-/* ============================================================================
-   RESPONSIVE DESIGN
-   ============================================================================ */
-
+/* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .wa-wrap {
-    padding: 12px;
-  }
+  .wa-wrap  { padding: 12px; }
+  .wa-card  { padding: 20px 18px; }
+  .wa-title { font-size: 24px; }
+  .wa-timer { font-size: 56px; }
+  .wa-word  { font-size: 36px; }
 
-  .wa-card {
-    padding: 24px 20px;
-  }
-
-  .wa-title {
-    font-size: 26px;
-  }
-
-  .wa-subtitle {
-    font-size: 16px;
-  }
-
-  .wa-timer {
-    font-size: 56px;
-  }
-
-  .wa-word {
-    font-size: 36px;
-  }
-
-  .wa-input {
-    font-size: 15px;
-    padding: 12px 16px;
-  }
-
-  .wa-btn-group {
-    flex-direction: column;
-  }
-
-  .wa-btn {
-    width: 100%;
-  }
+  .wa-btn-group { flex-direction: column; }
+  .wa-btn       { width: 100%; }
 
   .wa-history-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
   }
-
-  .wa-history-word {
-    font-size: 20px;
-  }
+  .wa-history-word { font-size: 18px; }
 }
 
 @media (max-width: 480px) {
-  .wa-card {
-    padding: 20px 16px;
-  }
-
-  .wa-title {
-    font-size: 24px;
-  }
-
-  .wa-timer {
-    font-size: 48px;
-  }
-
-  .wa-word {
-    font-size: 28px;
-  }
-
-  .wa-word-display {
-    padding: 24px 16px;
-  }
-
-  .wa-input-label {
-    font-size: 16px;
-    min-width: 25px;
-  }
-
-  .wa-input {
-    font-size: 14px;
-  }
-
-  .wa-instructions {
-    padding: 16px;
-  }
-
-  .wa-instructions ol {
-    margin-left: 16px;
-  }
+  .wa-card         { padding: 16px 14px; }
+  .wa-title        { font-size: 20px; }
+  .wa-timer        { font-size: 48px; }
+  .wa-word         { font-size: 28px; }
+  .wa-word-display { padding: 22px 14px; }
+  .wa-input-label  { font-size: 16px; min-width: 22px; }
+  .wa-input        { font-size: 14px; padding: 10px 12px; }
+  .wa-instructions { padding: 14px; }
+  .wa-instructions ol { margin-left: 16px; }
 }
 
-/* ============================================================================
-   PRINT STYLES
-   ============================================================================ */
-
+/* ── Print ───────────────────────────────────────────────────────────── */
 @media print {
-  .wa-btn,
-  .wa-btn-group,
-  .wa-timer,
-  .wa-progress-bar {
-    display: none;
-  }
-
-  .wa-card {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-
-  .wa-summary-box {
-    background: #f0f0f0;
-    color: #333;
-    box-shadow: none;
-  }
-
-  .wa-summary-text {
-    color: #333;
-  }
+  .wa-btn, .wa-btn-group, .wa-timer, .wa-progress-bar { display: none; }
+  .wa-card        { box-shadow: none; border: 1px solid #ccc; }
+  .wa-summary-box { background: #f0f0f0; box-shadow: none; }
+  .wa-summary-text { color: #333; }
 }

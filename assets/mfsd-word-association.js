@@ -84,15 +84,15 @@
         completedWords = data.completed || 0;
         showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
       } else {
-        showWelcome();
+        showWelcome(false);
       }
     } catch (err) {
       hideLoading(loading);
-      showWelcome();
+      showWelcome(false);
     }
   }
 
-  function showWelcome() {
+  function showWelcome(hasHistory) {
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card wa-welcome');
 
@@ -132,12 +132,14 @@
     const startBtn = el('button', 'wa-btn wa-btn-large', 'Start');
     startBtn.onclick = loadWord;
 
-    const historyBtn = el('button', 'wa-btn wa-secondary', 'View Past Associations');
-    historyBtn.onclick = showHistory;
-
     const btnGroup = el('div', 'wa-btn-group');
     btnGroup.appendChild(startBtn);
-    btnGroup.appendChild(historyBtn);
+
+    if (hasHistory) {
+      const historyBtn = el('button', 'wa-btn wa-secondary', 'View Past Associations');
+      historyBtn.onclick = showHistory;
+      btnGroup.appendChild(historyBtn);
+    }
 
     card.appendChild(title);
     card.appendChild(subtitle);
@@ -348,7 +350,8 @@
 
     const summaryBox   = el('div', 'wa-summary-box');
     const summaryTitle = el('h3', 'wa-section-title', 'Steve Says:');
-    const summaryText  = el('div', 'wa-summary-text', summary);
+    const summaryText  = el('div', 'wa-summary-text');
+    summaryText.innerHTML = formatSummaryForDisplay(summary);
     summaryBox.appendChild(summaryTitle);
     summaryBox.appendChild(summaryText);
     card.appendChild(summaryBox);

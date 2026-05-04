@@ -317,7 +317,7 @@ final class MFSD_Word_Association {
        
         
         // Generate AI summary
-        $ai_summary = $this->generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id);
+        $ai_summary = $this->generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id, $time_taken);
         
         // Save to database
         $wpdb->insert($table, array(
@@ -373,70 +373,18 @@ final class MFSD_Word_Association {
         ));
     }
     
-    private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id) {
-        // Try SteveGPT first, fall back to MWAI
-        $ai_engine = null;
-        
-        if (isset($GLOBALS['stevegpt'])) {
-            $ai_engine = $GLOBALS['stevegpt'];
-            error_log('Word Association: Using SteveGPT');
-        } elseif (isset($GLOBALS['mwai'])) {
-            $ai_engine = $GLOBALS['mwai'];
-            error_log('Word Association: Using MWAI (fallback)');
-        } else {
-            return "AI Engine not available. Please install and configure SteveGPT or AI Engine plugin.";
-        }
-        
+    private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id, $time_taken = 0) {
         try {
-            $user = get_userdata($user_id);
-            $username = $user ? $user->display_name : 'Student';
-
-            $prompt = "You are a warm, supportive coach speaking directly to {$username}, a student aged 11-14.\n\n";
-            
-            $prompt .= "{$username} saw the word \"{$word}\" and gave these associations:\n";
-            $prompt .= "1. {$assoc1}\n";
-            $prompt .= "2. {$assoc2}\n";
-            $prompt .= "3. {$assoc3}\n\n";
-            
-            $prompt .= "Write a summary with this EXACT structure (use double line breaks between each section):\n\n";
-            
-            $prompt .= "SECTION 1 (Introduction - 1-2 sentences):\n";
-            $prompt .= "Briefly welcome {$username} and mention you'll explore their associations.\n\n";
-            
-            $prompt .= "SECTION 2 (Association 1 - 2-3 sentences):\n";
-            $prompt .= "Start with: **\"{$word} and {$assoc1}\":**\n";
-            $prompt .= "Explore what this connection reveals about {$username}'s perspective.\n\n";
-            
-            $prompt .= "SECTION 3 (Association 2 - 2-3 sentences):\n";
-            $prompt .= "Start with: **\"{$word} and {$assoc2}\":**\n";
-            $prompt .= "Explore what this connection reveals.\n\n";
-            
-            $prompt .= "SECTION 4 (Association 3 - 2-3 sentences):\n";
-            $prompt .= "Start with: **\"{$word} and {$assoc3}\":**\n";
-            $prompt .= "Explore what this connection reveals.\n\n";
-            
-            $prompt .= "SECTION 5 (Conclusion - 3-4 sentences):\n";
-            $prompt .= "Tie all three together showing the bigger picture of how {$username} relates to \"{$word}\".\n\n";
-            
-            $prompt .= "CRITICAL FORMATTING RULES:\n";
-            $prompt .= "- Use TWO line breaks (\\n\\n) between each section\n";
-            $prompt .= "- Bold the association headers like: **\"Communication and excellent\":**\n";
-            $prompt .= "- Use 'you' and 'your' - speak directly to {$username}\n";
-            $prompt .= "- Keep each section short (mobile-friendly)\n";
-            $prompt .= "- Age-appropriate language for 11-14 year olds\n";
-            $prompt .= "- UK spelling and context\n";
-            $prompt .= "- Be warm, encouraging, and growth-focused\n\n";
-            
-            $prompt .= "Start writing now:";
-
-            // Actually call the AI
-            $summary = $ai_engine->simpleTextQuery($prompt);
-            
-            // Post-process to ensure proper formatting
-            $summary = $this->format_ai_summary($summary, $word, $assoc1, $assoc2, $assoc3);
-
-            return $summary;
-            
+            $chatbot = SteveGPT_Chatbot::get('word-association');
+            $prompt  = $chatbot->render_prompt([
+                'word'          => $word,
+                'association_1' => $assoc1,
+                'association_2' => $assoc2,
+                'association_3' => $assoc3,
+                'time_taken'    => $time_taken . ' seconds',
+            ]);
+            $summary = $chatbot->query($prompt, $user_id);
+            return $this->format_ai_summary($summary, $word, $assoc1, $assoc2, $assoc3);
         } catch (Exception $e) {
             error_log('MFSD Word Association: AI summary error: ' . $e->getMessage());
             return "I'm having trouble generating insights right now. Your associations have been saved!";

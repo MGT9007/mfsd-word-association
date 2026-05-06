@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.2.0
+ * Version: 3.3.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.2.0';
+    const VERSION = '3.3.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -375,7 +375,8 @@ final class MFSD_Word_Association {
     
     private function generate_ai_summary($word, $assoc1, $assoc2, $assoc3, $user_id, $time_taken = 0) {
         try {
-            $chatbot_id = get_option('mfsd_wa_chatbot_id', 'word-association');
+            $chatbot_id = get_option('mfsd_stevegpt_map_word_association_summary',
+                              get_option('mfsd_wa_chatbot_id', ''));
             $chatbot = SteveGPT_Chatbot::get($chatbot_id);
             $prompt  = $chatbot->render_prompt([
                 'word'          => $word,
@@ -480,17 +481,6 @@ final class MFSD_Word_Association {
         global $wpdb;
         $cards_table = $wpdb->prefix . self::TBL_CARDS;
         
-        // Handle AI settings save
-        if (isset($_POST['action']) && $_POST['action'] === 'save_ai_settings' &&
-            check_admin_referer('mfsd_word_assoc_ai_settings')) {
-
-            $chatbot_id = sanitize_text_field($_POST['chatbot_id'] ?? '');
-            if ($chatbot_id) {
-                update_option('mfsd_wa_chatbot_id', $chatbot_id);
-            }
-            echo '<div class="notice notice-success"><p>AI settings saved successfully!</p></div>';
-        }
-
         // Handle mode settings save
         if (isset($_POST['action']) && $_POST['action'] === 'save_mode_settings' &&
             check_admin_referer('mfsd_word_assoc_mode_settings')) {
@@ -583,45 +573,9 @@ final class MFSD_Word_Association {
             $current_cm = get_option('mfsd_wa_course_management', 1);
             ?>
             
-            <h2>AI Settings</h2>
-            <?php
-            $current_chatbot_id = get_option('mfsd_wa_chatbot_id', 'word-association');
-
-            // Fetch available SteveGPT chatbots
-            $stevegpt_chatbots = array();
-            if (class_exists('SteveGPT_Chatbot')) {
-                $stevegpt_chatbots = SteveGPT_Chatbot::get_all(false);
-            }
-            ?>
-            <form method="post" action="">
-                <?php wp_nonce_field('mfsd_word_assoc_ai_settings'); ?>
-                <input type="hidden" name="action" value="save_ai_settings">
-                <table class="form-table">
-                    <tr>
-                        <th scope="row"><label for="chatbot_id">AI Chatbot</label></th>
-                        <td>
-                            <?php if (empty($stevegpt_chatbots)): ?>
-                                <input type="text" name="chatbot_id" id="chatbot_id" value="<?php echo esc_attr($current_chatbot_id); ?>" class="regular-text">
-                                <p class="description">SteveGPT not active — enter chatbot ID manually.</p>
-                            <?php else: ?>
-                                <select name="chatbot_id" id="chatbot_id" style="min-width: 300px;">
-                                    <?php foreach ($stevegpt_chatbots as $bot): ?>
-                                        <option value="<?php echo esc_attr($bot['chatbot_id']); ?>" <?php selected($current_chatbot_id, $bot['chatbot_id']); ?>>
-                                            <?php echo esc_html($bot['name']); ?> (<?php echo esc_html($bot['chatbot_id']); ?>)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <p class="description">Select the SteveGPT chatbot used to generate AI summaries for word association results.</p>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                </table>
-                <p class="submit">
-                    <input type="submit" class="button button-primary" value="Save AI Settings">
-                </p>
-            </form>
-
-            <hr style="margin: 30px 0;">
+            <p class="description" style="margin-bottom:16px;">
+                AI chatbot assignment is managed in <a href="<?php echo esc_url(admin_url('admin.php?page=stevegpt-integrations')); ?>">SteveGPT → Plugin Integrations</a>.
+            </p>
 
             <h2>Mode Settings</h2>
             <form method="post" action="" id="mode-settings-form">

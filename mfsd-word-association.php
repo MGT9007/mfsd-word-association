@@ -199,13 +199,15 @@ final class MFSD_Word_Association {
         $nonce = wp_create_nonce('wp_rest');
         
         wp_localize_script('mfsd-word-assoc-js', 'MFSD_WA_CFG', array(
-            'userId' => $user_id,
-            'restUrl' => $rest_url,
-            'nonce' => $nonce,
-            'category' => $atts['category'],
-            'timer' => intval($atts['timer']),
-            'mode' => get_option('mfsd_wa_mode', 1),
-            'wordCount' => get_option('mfsd_wa_word_count', 1)
+            'userId'     => $user_id,
+            'restUrl'    => $rest_url,
+            'nonce'      => $nonce,
+            'category'   => $atts['category'],
+            'timer'      => intval($atts['timer']),
+            'mode'       => get_option('mfsd_wa_mode', 1),
+            'wordCount'  => get_option('mfsd_wa_word_count', 1),
+            'badgesUrl'  => 'https://mfsd.me/badges/',
+            'portalUrl'  => 'https://mfsd.me/about/parent-portal-home/?course_id=1&student_id=' . $user_id,
         ));
         
         return '<div id="mfsd-word-assoc-root"></div>';

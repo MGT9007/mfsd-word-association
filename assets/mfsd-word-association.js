@@ -399,6 +399,21 @@
     }
 
     if (btnGroup.children.length > 0) card.appendChild(btnGroup);
+
+    // Navigation buttons — always shown on results (both first completion and re-entry)
+    var navDiv = el('div', 'wa-summary-actions');
+    if (cfg.badgesUrl) {
+      var badgesLink = el('a', 'wa-btn wa-btn--badge', 'See My Badges');
+      badgesLink.href = cfg.badgesUrl;
+      navDiv.appendChild(badgesLink);
+    }
+    if (cfg.portalUrl) {
+      var progressLink = el('a', 'wa-btn wa-btn--progress', 'View My Progress →');
+      progressLink.href = cfg.portalUrl;
+      navDiv.appendChild(progressLink);
+    }
+    card.appendChild(navDiv);
+
     wrap.appendChild(card);
     root.replaceChildren(wrap);
   }
@@ -492,6 +507,19 @@
     historyBtn.onclick = showHistory;
     historyBtn.style.cssText = 'display:block;margin:0 auto;';
     card.appendChild(historyBtn);
+
+    var navDiv2 = el('div', 'wa-summary-actions');
+    if (cfg.badgesUrl) {
+      var badgesLink2 = el('a', 'wa-btn wa-btn--badge', 'See My Badges');
+      badgesLink2.href = cfg.badgesUrl;
+      navDiv2.appendChild(badgesLink2);
+    }
+    if (cfg.portalUrl) {
+      var progressLink2 = el('a', 'wa-btn wa-btn--progress', 'View My Progress →');
+      progressLink2.href = cfg.portalUrl;
+      navDiv2.appendChild(progressLink2);
+    }
+    card.appendChild(navDiv2);
 
     wrap.appendChild(card);
     root.replaceChildren(wrap);

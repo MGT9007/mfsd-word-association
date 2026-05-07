@@ -577,6 +577,48 @@
   text-transform: uppercase;
 }
 
+/* ── Summary navigation buttons ─────────────────────────────────────── */
+.wa-summary-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.wa-summary-actions a {
+  text-decoration: none;
+}
+
+.wa-btn--badge {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--text-light) !important;
+}
+
+.wa-btn--badge:hover {
+  background: var(--accent-2-hover);
+  border-color: var(--accent-2-hover);
+  box-shadow: var(--glow-purple);
+  transform: translateY(-2px);
+  color: var(--text-light) !important;
+}
+
+.wa-btn--progress {
+  background: transparent;
+  border-color: var(--accent);
+  color: var(--accent) !important;
+}
+
+.wa-btn--progress:hover {
+  background: rgba(0, 212, 255, 0.1);
+  box-shadow: var(--glow-cyan-md);
+  transform: translateY(-2px);
+  color: var(--accent) !important;
+}
+
 /* ── Loading overlay ─────────────────────────────────────────────────── */
 .wa-loading-overlay {
   position: fixed;

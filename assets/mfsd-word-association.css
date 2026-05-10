@@ -25,7 +25,7 @@
 
 /* ── Layout ──────────────────────────────────────────────────────────── */
 .wa-wrap {
-  max-width: min(1200px, 82vw);
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   font-family: var(--font-body);

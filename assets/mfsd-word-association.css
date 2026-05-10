@@ -46,7 +46,7 @@
 .wa-title {
   margin: 0 0 10px;
   font-family: var(--font-heading);
-  font-size: 30px;
+  font-size: 38px;
   font-weight: 700;
   text-align: center;
   color: var(--accent-3);
@@ -56,7 +56,7 @@
 
 .wa-subtitle {
   margin: 0 0 24px;
-  font-size: 16px;
+  font-size: 19px;
   color: var(--text-muted);
   text-align: center;
   font-family: var(--font-body);
@@ -82,15 +82,17 @@
   background: var(--bg-inner);
   border: 1px solid var(--border-dim);
   border-radius: 10px;
-  padding: 20px 24px;
-  margin: 20px 0;
+  padding: 28px 40px;
+  margin: 20px auto;
   color: var(--text);
+  text-align: center;
+  max-width: 760px;
 }
 
 .wa-instructions h3 {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
@@ -98,16 +100,19 @@
 }
 
 .wa-instructions ol {
-  margin: 0 0 0 20px;
+  margin: 0 auto;
   padding: 0;
-  line-height: 1.9;
+  line-height: 2;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
+  list-style-position: inside;
+  display: inline-block;
+  text-align: left;
 }
 
 .wa-instructions li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .wa-instructions strong {

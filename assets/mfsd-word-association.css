@@ -74,7 +74,7 @@
 
 /* ── Welcome screen ──────────────────────────────────────────────────── */
 .wa-welcome {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -323,7 +323,7 @@
 
 /* ── Results screen ──────────────────────────────────────────────────── */
 .wa-results {
-  max-width: 650px;
+  max-width: 100%;
   margin: 0 auto;
 }
 

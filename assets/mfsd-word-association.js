@@ -73,23 +73,47 @@
   async function init() {
     const loading = showLoading('Loading...');
     try {
-      const data = await apiCall('history?limit=1');
-      hideLoading(loading);
-      if (data.history && data.history.length > 0) {
-        const last = data.history[0];
-        currentWord    = { word: last.word, id: last.card_id };
-        timeElapsed    = last.time_taken;
-        currentMode    = data.mode || cfg.mode || 1;
-        totalWords     = data.total_words || cfg.wordCount || 1;
-        completedWords = data.completed || 0;
-        showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+      if (cfg.studentId) {
+        // Parent-portal view: fetch the student's history read-only.
+        const data = await apiCall(`student-history?student_id=${cfg.studentId}&limit=20`);
+        hideLoading(loading);
+        if (data.history && data.history.length > 0) {
+          renderHistory(data.history, true);
+        } else {
+          showParentNoData();
+        }
       } else {
-        showWelcome(false);
+        const data = await apiCall('history?limit=1');
+        hideLoading(loading);
+        if (data.history && data.history.length > 0) {
+          const last = data.history[0];
+          currentWord    = { word: last.word, id: last.card_id };
+          timeElapsed    = last.time_taken;
+          currentMode    = data.mode || cfg.mode || 1;
+          totalWords     = data.total_words || cfg.wordCount || 1;
+          completedWords = data.completed || 0;
+          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+        } else {
+          showWelcome(false);
+        }
       }
     } catch (err) {
       hideLoading(loading);
-      showWelcome(false);
+      if (cfg.studentId) {
+        showParentNoData();
+      } else {
+        showWelcome(false);
+      }
     }
+  }
+
+  function showParentNoData() {
+    const wrap = el('div', 'wa-wrap');
+    const card = el('div', 'wa-card');
+    card.appendChild(el('h2', 'wa-title', 'Word Association'));
+    card.appendChild(el('p', 'wa-empty', 'No completed word associations yet for this student.'));
+    wrap.appendChild(card);
+    root.replaceChildren(wrap);
   }
 
   function showWelcome(hasHistory) {
@@ -423,24 +447,29 @@
     try {
       const data = await apiCall('history?limit=20');
       hideLoading(loading);
-      renderHistory(data.history || []);
+      renderHistory(data.history || [], false);
     } catch (err) {
       hideLoading(loading);
       showError('Failed to load history.');
     }
   }
 
-  function renderHistory(history) {
+  // parentView = true: read-only, no Back/Start buttons, title says "Results" not "History"
+  function renderHistory(history, parentView) {
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card');
 
-    card.appendChild(el('h2', 'wa-title', 'Your Association History'));
+    card.appendChild(el('h2', 'wa-title', parentView ? 'Word Association Results' : 'Your Association History'));
 
     if (history.length === 0) {
-      card.appendChild(el('p', 'wa-empty', "You haven't completed any word associations yet. Start your first one!"));
-      const startBtn = el('button', 'wa-btn', 'Start Now');
-      startBtn.onclick = loadWord;
-      card.appendChild(startBtn);
+      card.appendChild(el('p', 'wa-empty', parentView
+        ? 'No completed word associations yet for this student.'
+        : "You haven't completed any word associations yet. Start your first one!"));
+      if (!parentView) {
+        const startBtn = el('button', 'wa-btn', 'Start Now');
+        startBtn.onclick = loadWord;
+        card.appendChild(startBtn);
+      }
     } else {
       const historyList = el('div', 'wa-history-list');
 
@@ -476,18 +505,20 @@
       card.appendChild(historyList);
     }
 
-    const backBtn = el('button', 'wa-btn wa-secondary', 'Back');
-    backBtn.onclick = () => {
-      if (history.length > 0) {
-        const last = history[0];
-        currentWord = { word: last.word, id: last.card_id };
-        timeElapsed = last.time_taken;
-        showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
-      } else {
-        showWelcome();
-      }
-    };
-    card.appendChild(backBtn);
+    if (!parentView) {
+      const backBtn = el('button', 'wa-btn wa-secondary', 'Back');
+      backBtn.onclick = () => {
+        if (history.length > 0) {
+          const last = history[0];
+          currentWord = { word: last.word, id: last.card_id };
+          timeElapsed = last.time_taken;
+          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+        } else {
+          showWelcome();
+        }
+      };
+      card.appendChild(backBtn);
+    }
 
     wrap.appendChild(card);
     root.replaceChildren(wrap);

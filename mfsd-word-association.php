@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.3.4
+ * Version: 3.3.5
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.3.4';
+    const VERSION = '3.3.5';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -170,10 +170,15 @@ final class MFSD_Word_Association {
             return '<p class="wa-error">Please log in to play word association.</p>';
         }
 
-        // ── Ordering gate ──────────────────────────────────────────────────
-        if ( function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
-            $student_id = get_current_user_id();
-            $status     = mfsd_get_task_status( $student_id, 'word_association' );
+        $user_id = get_current_user_id();
+
+        // Detect parent-portal view: ?student_id differs from current user.
+        $requested_student = isset( $_GET['student_id'] ) ? (int) $_GET['student_id'] : 0;
+        $is_parent_view    = $requested_student > 0 && $requested_student !== $user_id;
+
+        // ── Ordering gate (students only — skip for parent-portal views) ───
+        if ( ! $is_parent_view && function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
+            $status = mfsd_get_task_status( $user_id, 'word_association' );
 
             if ( $status === 'locked' ) {
                 if ( function_exists( 'mfsd_ordering_locked_message' ) ) {
@@ -183,23 +188,20 @@ final class MFSD_Word_Association {
             }
 
             if ( $status === 'available' ) {
-                // First visit — mark as started
-                mfsd_set_task_status( $student_id, 'word_association', 'in_progress' );
+                mfsd_set_task_status( $user_id, 'word_association', 'in_progress' );
             }
-            // 'in_progress', 'completed', 'not_configured' — all fall through,
-            // existing JS history logic handles the completed display.
         }
         // ── End ordering gate ──────────────────────────────────────────────
 
         wp_enqueue_style('mfsd-word-assoc-css');
         wp_enqueue_script('mfsd-word-assoc-js');
-        
-        $user_id = get_current_user_id();
+
         $rest_url = rest_url('mfsd-word-assoc/v1/');
-        $nonce = wp_create_nonce('wp_rest');
-        
+        $nonce    = wp_create_nonce('wp_rest');
+
         wp_localize_script('mfsd-word-assoc-js', 'MFSD_WA_CFG', array(
             'userId'     => $user_id,
+            'studentId'  => $is_parent_view ? $requested_student : 0,
             'restUrl'    => $rest_url,
             'nonce'      => $nonce,
             'category'   => $atts['category'],
@@ -234,6 +236,13 @@ final class MFSD_Word_Association {
         register_rest_route($ns, '/history', array(
             'methods' => 'GET',
             'callback' => array($this, 'api_get_history'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+
+        // Get a student's history — for linked parents viewing via the parent portal
+        register_rest_route($ns, '/student-history', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'api_get_student_history'),
             'permission_callback' => array($this, 'check_permission')
         ));
     }
@@ -464,6 +473,51 @@ final class MFSD_Word_Association {
             'mode' => $mode,
             'total_words' => $mode == 2 ? count($selected_words) : null,
             'completed' => $mode == 2 ? intval($completed_count) : null
+        ));
+    }
+
+    public function api_get_student_history($req) {
+        global $wpdb;
+
+        $viewer_id  = get_current_user_id();
+        $student_id = absint($req->get_param('student_id'));
+
+        if (!$student_id) {
+            return new WP_Error('missing_param', 'Missing student_id', array('status' => 400));
+        }
+
+        // Verify the requester is a linked parent for this student.
+        $is_linked = (bool) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}mfsd_parent_student_links
+             WHERE parent_user_id = %d AND student_user_id = %d AND link_status = 'active'",
+            $viewer_id, $student_id
+        ));
+
+        if (!$is_linked) {
+            return new WP_Error('forbidden', 'You are not linked to this student.', array('status' => 403));
+        }
+
+        $table = $wpdb->prefix . self::TBL_ASSOCIATIONS;
+        $limit = min(absint($req->get_param('limit') ?: 20), 50);
+
+        $history = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table WHERE user_id = %d ORDER BY created_at DESC LIMIT %d",
+            $student_id, $limit
+        ));
+
+        $mode           = get_option('mfsd_wa_mode', 1);
+        $selected_words = get_option('mfsd_wa_selected_words', array());
+        $completed_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT card_id) FROM $table WHERE user_id = %d",
+            $student_id
+        ));
+
+        return rest_ensure_response(array(
+            'success'     => true,
+            'history'     => $history,
+            'mode'        => $mode,
+            'total_words' => $mode == 2 ? count($selected_words) : null,
+            'completed'   => $mode == 2 ? intval($completed_count) : null,
         ));
     }
 

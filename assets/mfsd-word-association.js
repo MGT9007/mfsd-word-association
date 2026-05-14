@@ -47,7 +47,7 @@
     if (body) options.body = JSON.stringify(body);
     try {
       const res = await fetch(cfg.restUrl + endpoint, options);
-      if (!res.ok) throw new Error('API request failed');
+      if (!res.ok) { const e = new Error('API request failed'); e.status = res.status; throw e; }
       return await res.json();
     } catch (err) {
       console.error('API Error:', err);
@@ -73,7 +73,7 @@
   async function init() {
     const loading = showLoading('Loading...');
     try {
-      if (cfg.studentId) {
+      if (cfg.studentId && cfg.studentId !== cfg.userId) {
         // Parent-portal view: fetch the student's history read-only.
         const data = await apiCall(`student-history?student_id=${cfg.studentId}&limit=20`);
         hideLoading(loading);
@@ -99,7 +99,8 @@
       }
     } catch (err) {
       hideLoading(loading);
-      if (cfg.studentId) {
+      // 403 means this user isn't a linked parent — fall back to the student start screen.
+      if (cfg.studentId && cfg.studentId !== cfg.userId && err.status !== 403) {
         showParentNoData();
       } else {
         showWelcome(false);

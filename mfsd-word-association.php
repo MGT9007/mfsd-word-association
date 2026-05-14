@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.3.6
+ * Version: 3.3.7
  * Author: MisterT9007
  */
 

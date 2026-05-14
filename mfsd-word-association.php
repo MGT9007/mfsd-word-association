@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.3.5
+ * Version: 3.3.6
  * Author: MisterT9007
  */
 
@@ -172,9 +172,11 @@ final class MFSD_Word_Association {
 
         $user_id = get_current_user_id();
 
-        // Detect parent-portal view: ?student_id differs from current user.
+        // Detect parent-portal view: ?student_id differs from current user AND viewer is a parent/teacher/admin.
         $requested_student = isset( $_GET['student_id'] ) ? (int) $_GET['student_id'] : 0;
-        $is_parent_view    = $requested_student > 0 && $requested_student !== $user_id;
+        $viewer_roles      = wp_get_current_user()->roles;
+        $viewer_is_parent  = array_intersect( $viewer_roles, [ 'parent', 'teacher', 'administrator' ] );
+        $is_parent_view    = $requested_student > 0 && $requested_student !== $user_id && $viewer_is_parent;
 
         // ── Ordering gate (students only — skip for parent-portal views) ───
         if ( ! $is_parent_view && function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {

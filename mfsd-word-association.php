@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.3.8
+ * Version: 3.3.9
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.3.8';
+    const VERSION = '3.3.9';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -172,11 +172,14 @@ final class MFSD_Word_Association {
 
         $user_id = get_current_user_id();
 
-        // Detect parent-portal view: ?student_id differs from current user AND viewer is a parent/teacher/admin.
+        // Detect parent-portal view — same pattern as Solution Lens.
         $requested_student = isset( $_GET['student_id'] ) ? (int) $_GET['student_id'] : 0;
-        $viewer_roles      = wp_get_current_user()->roles;
-        $viewer_is_parent  = array_intersect( $viewer_roles, [ 'parent', 'teacher', 'administrator' ] );
-        $is_parent_view    = $requested_student > 0 && $requested_student !== $user_id && $viewer_is_parent;
+        $role              = get_user_meta( $user_id, 'mfsd_role', true ) ?: '';
+        $is_parent_view    = $role === 'parent'
+            || ( $requested_student > 0 && $requested_student !== $user_id );
+        if ( $is_parent_view ) {
+            $role = 'parent'; // normalise for JS config
+        }
 
         // ── Ordering gate (students only — skip for parent-portal views) ───
         if ( ! $is_parent_view && function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
@@ -203,6 +206,7 @@ final class MFSD_Word_Association {
 
         wp_localize_script('mfsd-word-assoc-js', 'MFSD_WA_CFG', array(
             'userId'     => $user_id,
+            'role'       => $role,
             'studentId'  => $is_parent_view ? $requested_student : 0,
             'restUrl'    => $rest_url,
             'nonce'      => $nonce,

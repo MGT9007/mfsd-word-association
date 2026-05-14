@@ -6,6 +6,11 @@
 
   const TIMER_DURATION = cfg.timer || 20;
 
+  // Derive parent-view from the live URL — immune to page-cache poisoning.
+  // cfg.studentId can be stale if the page HTML was cached from a parent visit.
+  const _urlSid = parseInt(new URLSearchParams(window.location.search).get('student_id') || '0');
+  const effectiveStudentId = (_urlSid && _urlSid !== cfg.userId) ? _urlSid : 0;
+
   let currentMode    = 1;
   let totalWords     = 0;
   let completedWords = 0;
@@ -73,9 +78,9 @@
   async function init() {
     const loading = showLoading('Loading...');
     try {
-      if (cfg.studentId && cfg.studentId !== cfg.userId) {
+      if (effectiveStudentId) {
         // Parent-portal view: fetch the student's history read-only.
-        const data = await apiCall(`student-history?student_id=${cfg.studentId}&limit=20`);
+        const data = await apiCall(`student-history?student_id=${effectiveStudentId}&limit=20`);
         hideLoading(loading);
         if (data.history && data.history.length > 0) {
           renderHistory(data.history, true);
@@ -100,7 +105,7 @@
     } catch (err) {
       hideLoading(loading);
       // 403 means this user isn't a linked parent — fall back to the student start screen.
-      if (cfg.studentId && cfg.studentId !== cfg.userId && err.status !== 403) {
+      if (effectiveStudentId && err.status !== 403) {
         showParentNoData();
       } else {
         showWelcome(false);

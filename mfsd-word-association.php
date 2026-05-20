@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.3.9
+ * Version: 3.4.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.3.9';
+    const VERSION = '3.4.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -636,7 +636,7 @@ final class MFSD_Word_Association {
             ?>
             
             <p class="description" style="margin-bottom:16px;">
-                AI chatbot assignment is managed in <a href="<?php echo esc_url(admin_url('admin.php?page=stevegpt-integrations')); ?>">SteveGPT → Plugin Integrations</a>.
+                AI chatbot assignment is managed in <a href="<?php echo esc_url(admin_url('admin.php?page=stevegpt-chatbots&tab=word-association')); ?>">SteveGPT → Chatbots → Word Association</a>.
             </p>
 
             <h2>Mode Settings</h2>

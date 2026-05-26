@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.5.0
+ * Version: 3.6.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.5.0';
+    const VERSION = '3.6.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -269,6 +269,13 @@ final class MFSD_Word_Association {
             'callback' => array($this, 'api_get_student_history'),
             'permission_callback' => array($this, 'check_permission')
         ));
+
+        // Generate/retrieve parent-facing AI summary for an association result
+        register_rest_route($ns, '/parent-summary', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'api_get_parent_summary'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
     }
     
     public function check_permission() {
@@ -400,11 +407,12 @@ final class MFSD_Word_Association {
         // ── End ordering notification ──────────────────────────────────────
 
         return rest_ensure_response(array(
-            'success' => true,
-            'summary' => $ai_summary,
-            'mode' => $mode,
-            'total_words' => $mode == 2 ? count($selected_words) : null,
-            'completed' => $mode == 2 ? count($completed_ids) : null
+            'success'        => true,
+            'summary'        => $ai_summary,
+            'association_id' => $wpdb->insert_id,
+            'mode'           => $mode,
+            'total_words'    => $mode == 2 ? count($selected_words) : null,
+            'completed'      => $mode == 2 ? count($completed_ids) : null
         ));
     }
     
@@ -543,6 +551,101 @@ final class MFSD_Word_Association {
             'total_words' => $mode == 2 ? count($selected_words) : null,
             'completed'   => $mode == 2 ? intval($completed_count) : null,
         ));
+    }
+
+    public function api_get_parent_summary( WP_REST_Request $request ) {
+        global $wpdb;
+
+        $viewer_id     = get_current_user_id();
+        $association_id = (int) $request->get_param('association_id');
+        $student_id     = (int) $request->get_param('student_id');
+
+        if ( $association_id <= 0 || $student_id <= 0 ) {
+            return new WP_Error( 'missing_params', 'association_id and student_id are required.', array( 'status' => 400 ) );
+        }
+
+        // Verify the requesting user is a linked parent for this student.
+        $links_table = $wpdb->prefix . 'mfsd_parent_student_links';
+        $link = $wpdb->get_var( $wpdb->prepare(
+            "SELECT id FROM {$links_table}
+             WHERE parent_user_id = %d AND student_user_id = %d AND link_status = 'active'
+             LIMIT 1",
+            $viewer_id, $student_id
+        ) );
+
+        if ( ! $link ) {
+            return new WP_Error( 'forbidden', 'You are not a linked parent for this student.', array( 'status' => 403 ) );
+        }
+
+        // Fetch the association row.
+        $assoc_table = $wpdb->prefix . 'mfsd_word_associations';
+        $row = $wpdb->get_row( $wpdb->prepare(
+            "SELECT * FROM {$assoc_table} WHERE id = %d AND user_id = %d",
+            $association_id, $student_id
+        ) );
+
+        if ( ! $row ) {
+            return new WP_Error( 'not_found', 'Association not found.', array( 'status' => 404 ) );
+        }
+
+        // Return cached summary if available.
+        if ( $row->parent_ai_summary !== null ) {
+            return rest_ensure_response( array(
+                'success' => true,
+                'summary' => $row->parent_ai_summary,
+                'cached'  => true,
+            ) );
+        }
+
+        // Generate summary via SteveGPT.
+        $chatbot_id = get_option( 'mfsd_stevegpt_map_wa_parent_summary', '' );
+        if ( ! $chatbot_id ) {
+            return rest_ensure_response( array(
+                'success' => true,
+                'summary' => 'A parent summary is not available for this result right now. Please try again later.',
+                'cached'  => false,
+            ) );
+        }
+
+        try {
+            $student      = get_userdata( $student_id );
+            $student_name = $student ? $student->display_name : 'the student';
+            $student_age  = (int) get_user_meta( $student_id, 'mfsd_age', true ) ?: '';
+
+            $chatbot = SteveGPT_Chatbot::get( $chatbot_id );
+            $prompt  = $chatbot->render_prompt( array(
+                'word'          => $row->word,
+                'association_1' => $row->association_1,
+                'association_2' => $row->association_2,
+                'association_3' => $row->association_3,
+                'time_taken'    => $row->time_taken . ' seconds',
+                'student_name'  => $student_name,
+                'student_age'   => $student_age ?: 'not recorded',
+            ) );
+            $summary = $chatbot->query( $prompt, $viewer_id );
+
+            // Cache in DB.
+            $wpdb->update(
+                $assoc_table,
+                array( 'parent_ai_summary' => $summary ),
+                array( 'id' => $association_id )
+            );
+
+            return rest_ensure_response( array(
+                'success' => true,
+                'summary' => $summary,
+                'cached'  => false,
+            ) );
+
+        } catch ( Exception $e ) {
+            error_log( 'MFSD WA parent summary error: ' . $e->getMessage() );
+            // Do NOT write to DB on error — allow retry.
+            return rest_ensure_response( array(
+                'success' => true,
+                'summary' => 'A parent summary is not available for this result right now. Please try again later.',
+                'cached'  => false,
+            ) );
+        }
     }
 
     public function admin_menu() {
@@ -931,6 +1034,21 @@ final class MFSD_Word_Association {
     }
     
 }
+
+// ─── DB MIGRATION — parent_ai_summary column ─────────────────────────────────
+add_action( 'plugins_loaded', function() {
+    global $wpdb;
+    $table = $wpdb->prefix . 'mfsd_word_associations';
+    $col = $wpdb->get_var(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = '{$table}'
+         AND COLUMN_NAME = 'parent_ai_summary'"
+    );
+    if ( ! $col ) {
+        $wpdb->query( "ALTER TABLE `{$table}` ADD COLUMN `parent_ai_summary` TEXT NULL AFTER `ai_summary`" );
+    }
+} );
 
 MFSD_Word_Association::instance();
 

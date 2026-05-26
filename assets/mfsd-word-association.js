@@ -69,6 +69,108 @@
     return text;
   }
 
+  // ==================== PARENT VIEW HELPERS ====================
+
+  const parentSummaryCache = new Map();
+
+  function appendChatbot(targetEl) {
+    if (!cfg.hasChatbot) return;
+    const container = document.getElementById('mfsd-wa-chatbot-container');
+    if (!container) return;
+    container.style.display = 'block';
+    targetEl.appendChild(container);
+  }
+
+  function renderTabBar(labels, activeIndex, onSwitch) {
+    const bar = el('div', 'wa-tab-bar');
+    labels.forEach((label, i) => {
+      const btn = el('button', 'wa-tab-btn' + (i === activeIndex ? ' wa-tab-active' : ''), label);
+      btn.onclick = () => {
+        bar.querySelectorAll('.wa-tab-btn').forEach((b, j) => {
+          b.classList.toggle('wa-tab-active', j === i);
+        });
+        onSwitch(i);
+      };
+      bar.appendChild(btn);
+    });
+    return bar;
+  }
+
+  async function renderParentTab(associationId, container) {
+    container.innerHTML = '';
+    const section = el('div', 'wa-parent-summary-section');
+    section.appendChild(el('h3', 'wa-section-title wa-parent-label', 'Parent Summary'));
+    const text = el('div', 'wa-parent-summary-text', 'Loading…');
+    section.appendChild(text);
+    container.appendChild(section);
+
+    if (parentSummaryCache.has(associationId)) {
+      text.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(associationId));
+      return;
+    }
+    try {
+      const data = await apiCall(
+        `parent-summary?association_id=${associationId}&student_id=${cfg.studentId}`
+      );
+      parentSummaryCache.set(associationId, data.summary || '');
+      text.innerHTML = formatSummaryForDisplay(data.summary || '');
+    } catch {
+      text.textContent = 'Unable to load parent summary. Please try again later.';
+    }
+  }
+
+  async function renderParentHistoryTab(history, container) {
+    if (history.length === 0) {
+      container.appendChild(el('p', 'wa-empty', 'No completed word associations yet.'));
+      return;
+    }
+
+    const list = el('div', 'wa-parent-history-list');
+
+    history.forEach((item, i) => {
+      const card = el('div', 'wa-parent-history-card');
+
+      const header = el('div', 'wa-history-header');
+      header.appendChild(el('div', 'wa-history-word', item.word));
+      header.appendChild(el('div', 'wa-history-date', new Date(item.created_at).toLocaleDateString()));
+      card.appendChild(header);
+
+      const assocs = el('div', 'wa-history-associations');
+      assocs.innerHTML = `
+        <div class="wa-history-assoc">1. ${item.association_1}</div>
+        <div class="wa-history-assoc">2. ${item.association_2}</div>
+        <div class="wa-history-assoc">3. ${item.association_3}</div>`;
+      card.appendChild(assocs);
+
+      const summaryBox  = el('div', 'wa-parent-summary-box');
+      const summaryText = el('div', 'wa-parent-summary-text', 'Loading…');
+      summaryBox.appendChild(el('div', 'wa-parent-summary-label', 'Parent Summary:'));
+      summaryBox.appendChild(summaryText);
+      card.appendChild(summaryBox);
+
+      list.appendChild(card);
+
+      // Staggered lazy load — 150ms between cards
+      setTimeout(async () => {
+        if (parentSummaryCache.has(item.id)) {
+          summaryText.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(item.id));
+          return;
+        }
+        try {
+          const data = await apiCall(
+            `parent-summary?association_id=${item.id}&student_id=${cfg.studentId}`
+          );
+          parentSummaryCache.set(item.id, data.summary || '');
+          summaryText.innerHTML = formatSummaryForDisplay(data.summary || '');
+        } catch {
+          summaryText.textContent = 'Summary unavailable.';
+        }
+      }, i * 150);
+    });
+
+    container.appendChild(list);
+  }
+
   // ==================== MAIN FLOW ====================
 
   async function init() {
@@ -93,7 +195,7 @@
           currentMode    = data.mode || cfg.mode || 1;
           totalWords     = data.total_words || cfg.wordCount || 1;
           completedWords = data.completed || 0;
-          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary, last.id || 0);
         } else {
           showWelcome(false);
         }
@@ -330,14 +432,16 @@
       }
 
       hideLoading(loading);
-      showResults(assoc1, assoc2, assoc3, data.summary);
+      const assocId = data.association_id || 0;
+      showResults(assoc1, assoc2, assoc3, data.summary, assocId);
     } catch (err) {
       hideLoading(loading);
       showError('Failed to save associations. Please try again.');
     }
   }
 
-  function showResults(assoc1, assoc2, assoc3, summary) {
+  function showResults(assoc1, assoc2, assoc3, summary, associationId) {
+    associationId = associationId || 0;
     const wrap = el('div', 'wa-wrap');
     const card = el('div', 'wa-card wa-results');
 
@@ -440,7 +544,33 @@
     }
     card.appendChild(navDiv);
 
-    wrap.appendChild(card);
+    if (isParentView && associationId) {
+      const studentPanel = el('div', 'wa-tab-panel wa-tab-panel--active');
+      studentPanel.appendChild(card);
+      const parentPanel = el('div', 'wa-tab-panel wa-tab-panel--hidden');
+      let parentLoaded = false;
+
+      const tabBar = renderTabBar(['Student View', 'For Parents'], 0, (idx) => {
+        studentPanel.classList.toggle('wa-tab-panel--active', idx === 0);
+        studentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 0);
+        parentPanel.classList.toggle('wa-tab-panel--active', idx === 1);
+        parentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 1);
+        if (idx === 1 && !parentLoaded) {
+          parentLoaded = true;
+          renderParentTab(associationId, parentPanel);
+        }
+      });
+
+      const tabWrap = el('div', 'wa-tab-wrap');
+      tabWrap.appendChild(tabBar);
+      tabWrap.appendChild(studentPanel);
+      tabWrap.appendChild(parentPanel);
+      wrap.appendChild(tabWrap);
+    } else {
+      wrap.appendChild(card);
+    }
+
+    appendChatbot(wrap);
     root.replaceChildren(wrap);
   }
 
@@ -514,7 +644,7 @@
           const last = history[0];
           currentWord = { word: last.word, id: last.card_id };
           timeElapsed = last.time_taken;
-          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary);
+          showResults(last.association_1, last.association_2, last.association_3, last.ai_summary, last.id || 0);
         } else {
           showWelcome();
         }
@@ -522,7 +652,33 @@
       card.appendChild(backBtn);
     }
 
-    wrap.appendChild(card);
+    if (isParentView) {
+      const studentPanel = el('div', 'wa-tab-panel wa-tab-panel--active');
+      studentPanel.appendChild(card);
+      const parentPanel = el('div', 'wa-tab-panel wa-tab-panel--hidden');
+      let parentLoaded = false;
+
+      const tabBar = renderTabBar(['Student View', 'For Parents'], 0, (idx) => {
+        studentPanel.classList.toggle('wa-tab-panel--active', idx === 0);
+        studentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 0);
+        parentPanel.classList.toggle('wa-tab-panel--active', idx === 1);
+        parentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 1);
+        if (idx === 1 && !parentLoaded) {
+          parentLoaded = true;
+          renderParentHistoryTab(history, parentPanel);
+        }
+      });
+
+      const tabWrap = el('div', 'wa-tab-wrap');
+      tabWrap.appendChild(tabBar);
+      tabWrap.appendChild(studentPanel);
+      tabWrap.appendChild(parentPanel);
+      wrap.appendChild(tabWrap);
+    } else {
+      wrap.appendChild(card);
+    }
+
+    appendChatbot(wrap);
     root.replaceChildren(wrap);
   }
 

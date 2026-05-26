@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.4.0
+ * Version: 3.5.0
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.4.0';
+    const VERSION = '3.5.0';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -181,6 +181,18 @@ final class MFSD_Word_Association {
             $role = 'parent'; // normalise for JS config
         }
 
+        // ── Resolve role-appropriate chatbot ───────────────────────────────
+        $chatbot_option = $is_parent_view
+            ? 'mfsd_stevegpt_map_wa_parent_chat'
+            : 'mfsd_stevegpt_map_wa_student_chat';
+        $chatbot_id   = get_option( $chatbot_option, '' );
+        $chatbot_html = '';
+
+        if ( $chatbot_id && shortcode_exists( 'stevegpt_chatbot' ) ) {
+            $chatbot_html = do_shortcode( '[stevegpt_chatbot id="' . esc_attr( $chatbot_id ) . '"]' );
+        }
+        // ── End chatbot resolution ─────────────────────────────────────────
+
         // ── Ordering gate (students only — skip for parent-portal views) ───
         if ( ! $is_parent_view && function_exists( 'mfsd_get_task_status' ) && get_option( 'mfsd_wa_course_management', 1 ) ) {
             $status = mfsd_get_task_status( $user_id, 'word_association' );
@@ -205,20 +217,26 @@ final class MFSD_Word_Association {
         $nonce    = wp_create_nonce('wp_rest');
 
         wp_localize_script('mfsd-word-assoc-js', 'MFSD_WA_CFG', array(
-            'userId'     => $user_id,
-            'role'       => $role,
-            'studentId'  => $is_parent_view ? $requested_student : 0,
-            'restUrl'    => $rest_url,
-            'nonce'      => $nonce,
-            'category'   => $atts['category'],
-            'timer'      => intval($atts['timer']),
-            'mode'       => get_option('mfsd_wa_mode', 1),
-            'wordCount'  => get_option('mfsd_wa_word_count', 1),
-            'badgesUrl'  => 'https://mfsd.me/badges/',
-            'portalUrl'  => 'https://mfsd.me/about/parent-portal-home/?course_id=1&student_id=' . $user_id,
+            'userId'      => $user_id,
+            'role'        => $role,
+            'studentId'   => $is_parent_view ? $requested_student : 0,
+            'restUrl'     => $rest_url,
+            'nonce'       => $nonce,
+            'category'    => $atts['category'],
+            'timer'       => intval($atts['timer']),
+            'mode'        => get_option('mfsd_wa_mode', 1),
+            'wordCount'   => get_option('mfsd_wa_word_count', 1),
+            'badgesUrl'   => 'https://mfsd.me/badges/',
+            'portalUrl'   => 'https://mfsd.me/about/parent-portal-home/?course_id=1&student_id=' . $user_id,
+            'hasChatbot'  => ! empty( $chatbot_html ),
         ));
-        
-        return '<div id="mfsd-word-assoc-root"></div>';
+
+        $output = '';
+        if ( $chatbot_html ) {
+            $output .= '<div id="mfsd-wa-chatbot-container" style="display:none;">' . $chatbot_html . '</div>';
+        }
+        $output .= '<div id="mfsd-word-assoc-root"></div>';
+        return $output;
     }
     
     public function register_routes() {
@@ -915,3 +933,30 @@ final class MFSD_Word_Association {
 }
 
 MFSD_Word_Association::instance();
+
+// ─── STEVEGPT INTEGRATION SLOTS ──────────────────────────────────────────────
+// Register three new chatbot slots with SteveGPT. The existing summary slot
+// (mfsd_stevegpt_map_word_association_summary) is hardcoded in SteveGPT core —
+// do NOT add it here.
+
+add_filter( 'stevegpt_plugin_integration_slots', function( array $slots ): array {
+    $slots[] = [
+        'plugin' => 'Word Association',
+        'role'   => 'Student chatbot',
+        'option' => 'mfsd_stevegpt_map_wa_student_chat',
+        'tokens' => [],
+    ];
+    $slots[] = [
+        'plugin' => 'Word Association',
+        'role'   => 'Parent summary',
+        'option' => 'mfsd_stevegpt_map_wa_parent_summary',
+        'tokens' => [ 'word', 'association_1', 'association_2', 'association_3', 'time_taken', 'student_name', 'student_age' ],
+    ];
+    $slots[] = [
+        'plugin' => 'Word Association',
+        'role'   => 'Parent chatbot',
+        'option' => 'mfsd_stevegpt_map_wa_parent_chat',
+        'tokens' => [],
+    ];
+    return $slots;
+} );

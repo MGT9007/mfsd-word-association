@@ -706,6 +706,26 @@
   .wa-summary-text { color: #333; }
 }
 
+/* ── Inline loading spinner (parent summary cards) ──────────────────── */
+.wa-inline-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.wa-inline-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-dim);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: wa-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
 /* ── Parent Tab System ───────────────────────────────────────────────── */
 .wa-tab-wrap {
   width: 100%;

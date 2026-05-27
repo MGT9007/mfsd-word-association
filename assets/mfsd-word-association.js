@@ -102,7 +102,8 @@
     container.innerHTML = '';
     const section = el('div', 'wa-parent-summary-section');
     section.appendChild(el('h3', 'wa-section-title wa-parent-label', 'Parent Summary'));
-    const text = el('div', 'wa-parent-summary-text', 'Loading…');
+    const text = el('div', 'wa-parent-summary-text');
+    text.innerHTML = '<span class="wa-inline-loading"><span class="wa-inline-spinner"></span>Loading…</span>';
     section.appendChild(text);
     container.appendChild(section);
 
@@ -145,7 +146,8 @@
       card.appendChild(assocs);
 
       const summaryBox  = el('div', 'wa-parent-summary-box');
-      const summaryText = el('div', 'wa-parent-summary-text', 'Loading…');
+      const summaryText = el('div', 'wa-parent-summary-text');
+      summaryText.innerHTML = '<span class="wa-inline-loading"><span class="wa-inline-spinner"></span>Loading…</span>';
       summaryBox.appendChild(el('div', 'wa-parent-summary-label', 'Parent Summary:'));
       summaryBox.appendChild(summaryText);
       card.appendChild(summaryBox);

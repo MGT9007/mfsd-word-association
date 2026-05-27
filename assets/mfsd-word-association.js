@@ -122,64 +122,87 @@
     }
   }
 
-  async function renderParentHistoryTab(history, container) {
+  function renderParentHistoryTab(history, container) {
     if (history.length === 0) {
       container.appendChild(el('p', 'wa-empty', 'No completed word associations yet.'));
       return;
     }
 
-    const list = el('div', 'wa-parent-history-list');
+    // State tracker — one entry per word panel
+    const panels = history.map((item, i) => {
+      const panel = el('div', 'wa-word-panel');
+      panel.style.display = i === 0 ? 'block' : 'none';
 
-    history.forEach((item, i) => {
-      const card = el('div', 'wa-parent-history-card');
+      // Date
+      panel.appendChild(el('div', 'wa-history-date', new Date(item.created_at).toLocaleDateString()));
 
-      const header = el('div', 'wa-history-header');
-      header.appendChild(el('div', 'wa-history-word', item.word));
-      header.appendChild(el('div', 'wa-history-date', new Date(item.created_at).toLocaleDateString()));
-      card.appendChild(header);
-
+      // Associations
       const assocs = el('div', 'wa-history-associations');
       assocs.innerHTML = `
         <div class="wa-history-assoc">1. ${item.association_1}</div>
         <div class="wa-history-assoc">2. ${item.association_2}</div>
         <div class="wa-history-assoc">3. ${item.association_3}</div>`;
-      card.appendChild(assocs);
+      panel.appendChild(assocs);
 
+      // Summary box — spinner shown until the tab is clicked
       const summaryBox  = el('div', 'wa-parent-summary-box');
       const summaryText = el('div', 'wa-parent-summary-text');
       summaryText.innerHTML = '<span class="wa-inline-loading"><span class="wa-inline-spinner"></span>Loading…</span>';
       summaryBox.appendChild(el('div', 'wa-parent-summary-label', 'Parent Summary:'));
       summaryBox.appendChild(summaryText);
-      card.appendChild(summaryBox);
+      panel.appendChild(summaryBox);
 
-      list.appendChild(card);
-
-      // Staggered lazy load — 150ms between cards
-      setTimeout(async () => {
-        const assocId = item.id || item.ID;
-        if (!assocId) {
-          summaryText.textContent = 'Summary not available for this entry.';
-          return;
-        }
-        if (parentSummaryCache.has(assocId)) {
-          summaryText.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(assocId));
-          return;
-        }
-        try {
-          const data = await apiCall(
-            `parent-summary?association_id=${assocId}&student_id=${cfg.studentId}`
-          );
-          parentSummaryCache.set(assocId, data.summary || '');
-          summaryText.innerHTML = formatSummaryForDisplay(data.summary || '');
-        } catch (err) {
-          console.error('Parent summary API error:', err);
-          const code = err && err.status ? ` (HTTP ${err.status})` : '';
-          summaryText.textContent = `Summary unavailable${code}. Please try again later.`;
-        }
-      }, i * 150);
+      return { panel, summaryText, loaded: false, loading: false };
     });
 
-    container.appendChild(list);
+    // Load summary for one tab (only once per tab)
+    async function loadSummary(idx) {
+      const state = panels[idx];
+      if (state.loaded || state.loading) return;
+      state.loading = true;
+
+      const item    = history[idx];
+      const assocId = item.id || item.ID;
+
+      if (!assocId) {
+        state.summaryText.textContent = 'Summary not available for this entry.';
+        state.loaded = true;
+        return;
+      }
+
+      if (parentSummaryCache.has(assocId)) {
+        state.summaryText.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(assocId));
+        state.loaded = true;
+        return;
+      }
+
+      try {
+        const data = await apiCall(
+          `parent-summary?association_id=${assocId}&student_id=${cfg.studentId}`
+        );
+        parentSummaryCache.set(assocId, data.summary || '');
+        state.summaryText.innerHTML = formatSummaryForDisplay(data.summary || '');
+      } catch (err) {
+        console.error('Parent summary API error:', err);
+        const code = err && err.status ? ` (HTTP ${err.status})` : '';
+        state.summaryText.textContent = `Summary unavailable${code}. Please try again later.`;
+      }
+      state.loaded = true;
+    }
+
+    // Tab bar — switch panel visibility and lazy-load on click
+    const wordTabBar = renderTabBar(history.map(item => item.word), 0, (idx) => {
+      panels.forEach((wp, i) => { wp.panel.style.display = i === idx ? 'block' : 'none'; });
+      loadSummary(idx);
+    });
+
+    const tabWrap = el('div', 'wa-history-tabs');
+    tabWrap.appendChild(wordTabBar);
+    panels.forEach(wp => tabWrap.appendChild(wp.panel));
+    container.appendChild(tabWrap);
+
+    // Kick off the first tab's summary straight away (it's already visible)
+    loadSummary(0);
   }
 
   // ==================== MAIN FLOW ====================

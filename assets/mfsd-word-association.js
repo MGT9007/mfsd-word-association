@@ -618,7 +618,8 @@
       const historyTabWrap = el('div', 'wa-history-tabs');
 
       const wordPanels = history.map((item, i) => {
-        const panel = el('div', i === 0 ? 'wa-tab-panel wa-tab-panel--active' : 'wa-tab-panel wa-tab-panel--hidden');
+        const panel = el('div', 'wa-word-panel');
+        panel.style.display = i === 0 ? 'block' : 'none';
 
         const date = new Date(item.created_at);
         panel.appendChild(el('div', 'wa-history-date', date.toLocaleDateString()));
@@ -643,8 +644,7 @@
 
       const wordTabBar = renderTabBar(history.map(item => item.word), 0, (idx) => {
         wordPanels.forEach((p, i) => {
-          p.classList.toggle('wa-tab-panel--active', i === idx);
-          p.classList.toggle('wa-tab-panel--hidden', i !== idx);
+          p.style.display = i === idx ? 'block' : 'none';
         });
       });
 

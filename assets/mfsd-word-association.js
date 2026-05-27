@@ -570,7 +570,7 @@
       wrap.appendChild(card);
     }
 
-    appendChatbot(wrap);
+    // Chatbot is shown only on the history screen, not on individual word results
     root.replaceChildren(wrap);
   }
 
@@ -603,23 +603,21 @@
         card.appendChild(startBtn);
       }
     } else {
-      const historyList = el('div', 'wa-history-list');
+      // Tab-per-word layout — each word gets its own tab
+      const historyTabWrap = el('div', 'wa-history-tabs');
 
-      history.forEach(item => {
-        const historyCard = el('div', 'wa-history-card');
+      const wordPanels = history.map((item, i) => {
+        const panel = el('div', i === 0 ? 'wa-tab-panel wa-tab-panel--active' : 'wa-tab-panel wa-tab-panel--hidden');
 
-        const header  = el('div', 'wa-history-header');
-        const wordEl  = el('div', 'wa-history-word', item.word);
-        const date    = new Date(item.created_at);
-        const dateEl  = el('div', 'wa-history-date', date.toLocaleDateString());
-        header.appendChild(wordEl);
-        header.appendChild(dateEl);
+        const date = new Date(item.created_at);
+        panel.appendChild(el('div', 'wa-history-date', date.toLocaleDateString()));
 
         const associations = el('div', 'wa-history-associations');
         associations.innerHTML = `
           <div class="wa-history-assoc">1. ${item.association_1}</div>
           <div class="wa-history-assoc">2. ${item.association_2}</div>
           <div class="wa-history-assoc">3. ${item.association_3}</div>`;
+        panel.appendChild(associations);
 
         const summary      = el('div', 'wa-history-summary');
         const summaryLabel = el('div', 'wa-history-summary-label', 'Steve Says:');
@@ -627,14 +625,21 @@
         summaryText.innerHTML = formatSummaryForDisplay(item.ai_summary);
         summary.appendChild(summaryLabel);
         summary.appendChild(summaryText);
+        panel.appendChild(summary);
 
-        historyCard.appendChild(header);
-        historyCard.appendChild(associations);
-        historyCard.appendChild(summary);
-        historyList.appendChild(historyCard);
+        return panel;
       });
 
-      card.appendChild(historyList);
+      const wordTabBar = renderTabBar(history.map(item => item.word), 0, (idx) => {
+        wordPanels.forEach((p, i) => {
+          p.classList.toggle('wa-tab-panel--active', i === idx);
+          p.classList.toggle('wa-tab-panel--hidden', i !== idx);
+        });
+      });
+
+      historyTabWrap.appendChild(wordTabBar);
+      wordPanels.forEach(p => historyTabWrap.appendChild(p));
+      card.appendChild(historyTabWrap);
     }
 
     if (!parentView) {

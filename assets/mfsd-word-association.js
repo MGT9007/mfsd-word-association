@@ -20,6 +20,8 @@
     const n = document.createElement(t);
     if (c) n.className = c;
     if (txt !== undefined) n.textContent = txt;
+    // Prevent buttons from accidentally submitting a parent-page form
+    if (t === 'button') n.type = 'button';
     return n;
   };
 
@@ -169,7 +171,8 @@
           summaryText.innerHTML = formatSummaryForDisplay(data.summary || '');
         } catch (err) {
           console.error('Parent summary API error:', err);
-          summaryText.textContent = 'Summary unavailable. Please refresh and try again.';
+          const code = err && err.status ? ` (HTTP ${err.status})` : '';
+          summaryText.textContent = `Summary unavailable${code}. Please try again later.`;
         }
       }, i * 150);
     });

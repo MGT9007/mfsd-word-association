@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.6.1
+ * Version: 3.6.2
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.6.1';
+    const VERSION = '3.6.2';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -589,10 +589,13 @@ final class MFSD_Word_Association {
         }
 
         // Return cached summary if available.
-        if ( $row->parent_ai_summary !== null ) {
+        // Use isset() to avoid PHP 8.2 deprecation notice if the column doesn't exist yet
+        // (migration may not have run), which would corrupt the JSON response body.
+        $cached = isset( $row->parent_ai_summary ) ? $row->parent_ai_summary : null;
+        if ( $cached !== null ) {
             return rest_ensure_response( array(
                 'success' => true,
-                'summary' => $row->parent_ai_summary,
+                'summary' => $cached,
                 'cached'  => true,
             ) );
         }

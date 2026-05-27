@@ -152,18 +152,24 @@
 
       // Staggered lazy load — 150ms between cards
       setTimeout(async () => {
-        if (parentSummaryCache.has(item.id)) {
-          summaryText.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(item.id));
+        const assocId = item.id || item.ID;
+        if (!assocId) {
+          summaryText.textContent = 'Summary not available for this entry.';
+          return;
+        }
+        if (parentSummaryCache.has(assocId)) {
+          summaryText.innerHTML = formatSummaryForDisplay(parentSummaryCache.get(assocId));
           return;
         }
         try {
           const data = await apiCall(
-            `parent-summary?association_id=${item.id}&student_id=${cfg.studentId}`
+            `parent-summary?association_id=${assocId}&student_id=${cfg.studentId}`
           );
-          parentSummaryCache.set(item.id, data.summary || '');
+          parentSummaryCache.set(assocId, data.summary || '');
           summaryText.innerHTML = formatSummaryForDisplay(data.summary || '');
-        } catch {
-          summaryText.textContent = 'Summary unavailable.';
+        } catch (err) {
+          console.error('Parent summary API error:', err);
+          summaryText.textContent = 'Summary unavailable. Please refresh and try again.';
         }
       }, i * 150);
     });
@@ -545,16 +551,16 @@
     card.appendChild(navDiv);
 
     if (isParentView && associationId) {
-      const studentPanel = el('div', 'wa-tab-panel wa-tab-panel--active');
+      const studentPanel = el('div', 'wa-outer-panel');
+      studentPanel.style.display = 'block';
       studentPanel.appendChild(card);
-      const parentPanel = el('div', 'wa-tab-panel wa-tab-panel--hidden');
+      const parentPanel = el('div', 'wa-outer-panel');
+      parentPanel.style.display = 'none';
       let parentLoaded = false;
 
       const tabBar = renderTabBar(['Student View', 'For Parents'], 0, (idx) => {
-        studentPanel.classList.toggle('wa-tab-panel--active', idx === 0);
-        studentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 0);
-        parentPanel.classList.toggle('wa-tab-panel--active', idx === 1);
-        parentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 1);
+        studentPanel.style.display = idx === 0 ? 'block' : 'none';
+        parentPanel.style.display  = idx === 1 ? 'block' : 'none';
         if (idx === 1 && !parentLoaded) {
           parentLoaded = true;
           renderParentTab(associationId, parentPanel);
@@ -658,16 +664,16 @@
     }
 
     if (isParentView) {
-      const studentPanel = el('div', 'wa-tab-panel wa-tab-panel--active');
+      const studentPanel = el('div', 'wa-outer-panel');
+      studentPanel.style.display = 'block';
       studentPanel.appendChild(card);
-      const parentPanel = el('div', 'wa-tab-panel wa-tab-panel--hidden');
+      const parentPanel = el('div', 'wa-outer-panel');
+      parentPanel.style.display = 'none';
       let parentLoaded = false;
 
       const tabBar = renderTabBar(['Student View', 'For Parents'], 0, (idx) => {
-        studentPanel.classList.toggle('wa-tab-panel--active', idx === 0);
-        studentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 0);
-        parentPanel.classList.toggle('wa-tab-panel--active', idx === 1);
-        parentPanel.classList.toggle('wa-tab-panel--hidden', idx !== 1);
+        studentPanel.style.display = idx === 0 ? 'block' : 'none';
+        parentPanel.style.display  = idx === 1 ? 'block' : 'none';
         if (idx === 1 && !parentLoaded) {
           parentLoaded = true;
           renderParentHistoryTab(history, parentPanel);

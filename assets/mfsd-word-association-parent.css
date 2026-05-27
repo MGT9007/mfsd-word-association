@@ -307,3 +307,114 @@
 @media (max-width: 480px) {
   .wa-tab-btn { font-size: 0.82rem; }
 }
+
+/* ── SteveGPT chatbot — corporate / parent theme ─────────────────────── */
+/* This CSS is only enqueued for the parent view, so we can safely target  */
+/* the chatbot container directly. Same gold-on-dark palette used in the   */
+/* home-widgets frontend.css corporate overrides.                           */
+/* NOTE: all colours are hardcoded here; CSS variables are NOT used because */
+/* the chatbot's dark surfaces must stay dark even when the rest of the WA  */
+/* plugin uses the light #F5F0E6 corporate background.                      */
+
+#mfsd-wa-chatbot-container .stevegpt-chatbot-container {
+  background: #1A1A1A !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-chat-header {
+  background: linear-gradient(135deg, #B8923E 0%, #C9A84C 100%) !important;
+  color: #111111 !important;
+  border-bottom-color: rgba(201, 168, 76, 0.3) !important;
+}
+
+/* All text / icons in the header — dark on gold */
+#mfsd-wa-chatbot-container .stevegpt-chat-header * {
+  color: #111111 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-chat-messages {
+  background: #111111 !important;
+}
+
+/* Custom scrollbar */
+#mfsd-wa-chatbot-container .stevegpt-chat-messages::-webkit-scrollbar-track {
+  background: rgba(201, 168, 76, 0.05) !important;
+}
+#mfsd-wa-chatbot-container .stevegpt-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.25) !important;
+}
+
+/* Assistant bubbles — dark surface, gold border, light text */
+#mfsd-wa-chatbot-container .stevegpt-message-assistant .stevegpt-message-content {
+  background: #1E1E1E !important;
+  border: 1px solid rgba(201, 168, 76, 0.35) !important;
+  color: #F5F5F5 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-message-assistant .stevegpt-message-content .stevegpt-message-text {
+  color: #F5F5F5 !important;
+}
+
+/* User bubbles — gold gradient, dark text */
+#mfsd-wa-chatbot-container .stevegpt-message-user .stevegpt-message-content {
+  background: linear-gradient(135deg, #B8923E 0%, #C9A84C 100%) !important;
+  color: #111111 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-message-user .stevegpt-message-content .stevegpt-message-text {
+  color: #111111 !important;
+}
+
+/* Assistant avatar */
+#mfsd-wa-chatbot-container .stevegpt-message-assistant .stevegpt-message-avatar {
+  background: linear-gradient(135deg, #B8923E 0%, #C9A84C 100%) !important;
+}
+
+/* Typing indicator dots */
+#mfsd-wa-chatbot-container .stevegpt-typing-dots span {
+  background: rgba(201, 168, 76, 0.6) !important;
+}
+
+/* Input area */
+#mfsd-wa-chatbot-container .stevegpt-chat-input {
+  background: #1A1A1A !important;
+  border-top-color: rgba(201, 168, 76, 0.20) !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-input-field {
+  background: #222222 !important;
+  border-color: rgba(201, 168, 76, 0.25) !important;
+  color: #F5F5F5 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-input-field::placeholder {
+  color: rgba(245, 245, 245, 0.40) !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-input-field:focus {
+  border-color: #C9A84C !important;
+  box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15) !important;
+  outline: none !important;
+}
+
+/* Send button — gold */
+#mfsd-wa-chatbot-container .stevegpt-send-button {
+  background: linear-gradient(135deg, #B8923E 0%, #C9A84C 100%) !important;
+  color: #111111 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-send-button:hover {
+  background: linear-gradient(135deg, #C9A84C 0%, #E2C06A 100%) !important;
+  box-shadow: 0 4px 12px rgba(201, 168, 76, 0.35) !important;
+}
+
+/* Reset / New Chat button — sits inside the gold header */
+#mfsd-wa-chatbot-container .stevegpt-reset-btn {
+  background: rgba(0, 0, 0, 0.20) !important;
+  border-color: rgba(0, 0, 0, 0.30) !important;
+  color: #111111 !important;
+}
+
+#mfsd-wa-chatbot-container .stevegpt-reset-btn:hover {
+  background: rgba(0, 0, 0, 0.30) !important;
+}
+

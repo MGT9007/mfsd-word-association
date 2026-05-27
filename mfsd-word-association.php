@@ -2,14 +2,14 @@
 /**
  * Plugin Name: MFSD Word Association
  * Description: Rapid word association game with AI-powered insights
- * Version: 3.6.3
+ * Version: 3.6.4
  * Author: MisterT9007
  */
 
 if (!defined('ABSPATH')) exit;
 
 final class MFSD_Word_Association {
-    const VERSION = '3.6.3';
+    const VERSION = '3.6.4';
     const NONCE_ACTION = 'mfsd_word_assoc_nonce';
     
     const TBL_CARDS = 'mfsd_flashcards_cards';
@@ -157,6 +157,8 @@ final class MFSD_Word_Association {
         }
         
         wp_register_style('mfsd-word-assoc-css', $url . 'assets/mfsd-word-association.css', array(), $ver);
+        // Parent CSS — loaded after student CSS (dependency) so its overrides win the cascade.
+        wp_register_style('mfsd-word-assoc-parent-css', $url . 'assets/mfsd-word-association-parent.css', array('mfsd-word-assoc-css'), $ver);
         wp_register_script('mfsd-word-assoc-js', $url . 'assets/mfsd-word-association.js', array(), $ver, true);
     }
     
@@ -211,6 +213,9 @@ final class MFSD_Word_Association {
         // ── End ordering gate ──────────────────────────────────────────────
 
         wp_enqueue_style('mfsd-word-assoc-css');
+        if ( $is_parent_view ) {
+            wp_enqueue_style('mfsd-word-assoc-parent-css');
+        }
         wp_enqueue_script('mfsd-word-assoc-js');
 
         $rest_url = rest_url('mfsd-word-assoc/v1/');
@@ -565,15 +570,14 @@ final class MFSD_Word_Association {
         }
 
         // Verify the requesting user is a linked parent for this student.
-        $links_table = $wpdb->prefix . 'mfsd_parent_student_links';
-        $link = $wpdb->get_var( $wpdb->prepare(
-            "SELECT id FROM {$links_table}
-             WHERE parent_user_id = %d AND student_user_id = %d AND link_status = 'active'
-             LIMIT 1",
+        // Use COUNT(*) — avoids dependency on any specific column name in the links table.
+        $is_linked = (bool) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}mfsd_parent_student_links
+             WHERE parent_user_id = %d AND student_user_id = %d AND link_status = 'active'",
             $viewer_id, $student_id
         ) );
 
-        if ( ! $link ) {
+        if ( ! $is_linked ) {
             return new WP_Error( 'forbidden', 'You are not a linked parent for this student.', array( 'status' => 403 ) );
         }
 

@@ -1,0 +1,309 @@
+/* MFSD Word Association — Parent / Corporate theme override */
+/* Loaded in addition to mfsd-word-association.css when role=parent */
+/* Palette: #F5F0E6 bg, #C9A84C gold accent, dark warm text */
+/* Fonts: Playfair Display (headings), Lato (body) */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@400;700&display=swap');
+
+/* ── Override CSS custom properties ──────────────────────────────────── */
+/* All variables defined on .wa-wrap in the student CSS are redeclared  */
+/* here so every component that uses var() picks up the corporate palette */
+.wa-wrap {
+  --bg-page:        #F5F0E6;
+  --bg-card:        #EDE8DC;
+  --bg-inner:       #E8E3D7;
+  --accent:         #C9A84C;
+  --accent-hover:   #DBB85C;
+  --accent-2:       #8A6020;
+  --accent-2-hover: #7A5018;
+  --accent-3:       #C9A84C;
+  --text:           #2A2010;
+  --text-light:     #FFFFFF;
+  --text-muted:     #7A6040;
+  --border:         rgba(201, 168, 76, 0.45);
+  --border-dim:     rgba(201, 168, 76, 0.22);
+  --rule:           rgba(0, 0, 0, 0.10);
+  --glow-cyan:      0 2px 10px rgba(201, 168, 76, 0.18);
+  --glow-cyan-md:   0 2px 6px  rgba(201, 168, 76, 0.22);
+  --glow-purple:    0 2px 8px  rgba(138, 96, 32, 0.28);
+  --font-heading:   'Playfair Display', serif;
+  --font-body:      'Lato', sans-serif;
+  --wa-gold:        #C9A84C;
+  --wa-cyan:        #C9A84C;
+  --wa-text:        #2A2010;
+  --wa-text-muted:  #7A6040;
+  --wa-border:      rgba(201, 168, 76, 0.25);
+  --wa-card-bg:     #EDE8DC;
+}
+
+/* ── Hardcoded colour overrides ──────────────────────────────────────── */
+/* The student CSS contains some literal colour values that don't use     */
+/* CSS variables; those are reset here.                                   */
+
+/* Glows / text-shadow */
+.wa-timer {
+  text-shadow: none;
+}
+.wa-timer.wa-timer-low {
+  text-shadow: none;
+}
+.wa-timer.wa-timer-warning {
+  text-shadow: none;
+}
+.wa-word {
+  text-shadow: none;
+}
+
+/* Progress bar fill */
+.wa-progress-bar {
+  background: rgba(201, 168, 76, 0.12);
+}
+.wa-progress-fill {
+  background: #C9A84C;
+  box-shadow: none;
+}
+
+/* Category badge */
+.wa-category {
+  background: rgba(201, 168, 76, 0.10);
+  color: #8A6020;
+}
+
+/* Inputs */
+.wa-input {
+  background: #F5F0E6;
+  border-color: rgba(201, 168, 76, 0.3);
+  color: #2A2010;
+}
+.wa-input::placeholder {
+  color: #9A8060;
+}
+.wa-input:focus {
+  border-color: #C9A84C;
+  box-shadow: 0 0 4px rgba(201, 168, 76, 0.28);
+}
+
+/* Primary button — gold filled */
+.wa-btn {
+  background: #C9A84C;
+  border-color: #C9A84C;
+  color: #fff;
+  box-shadow: none;
+}
+.wa-btn:hover {
+  background: #DBB85C;
+  border-color: #DBB85C;
+  box-shadow: 0 2px 8px rgba(201, 168, 76, 0.35);
+  transform: translateY(-1px);
+}
+.wa-btn:active {
+  transform: scale(0.98);
+}
+
+/* Secondary / outline button */
+.wa-btn.wa-secondary {
+  background: transparent;
+  border-color: #C9A84C;
+  color: #8A6020;
+}
+.wa-btn.wa-secondary:hover {
+  background: rgba(201, 168, 76, 0.10);
+  box-shadow: none;
+}
+
+/* Badge / progress nav buttons */
+.wa-btn--badge {
+  background: #8A6020;
+  border-color: #8A6020;
+  color: #fff !important;
+}
+.wa-btn--badge:hover {
+  background: #9A7030;
+  border-color: #9A7030;
+  box-shadow: 0 2px 8px rgba(138, 96, 32, 0.3);
+  color: #fff !important;
+}
+.wa-btn--progress {
+  background: transparent;
+  border-color: #C9A84C;
+  color: #8A6020 !important;
+}
+.wa-btn--progress:hover {
+  background: rgba(201, 168, 76, 0.10);
+  box-shadow: none;
+  color: #8A6020 !important;
+}
+
+/* Error box */
+.wa-error {
+  background: rgba(192, 48, 48, 0.07);
+  border-color: rgba(192, 48, 48, 0.30);
+  color: #C03030;
+}
+
+/* Complete message box */
+.wa-complete-message {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.30);
+}
+.wa-complete-message h3 {
+  color: #8A6020;
+}
+.wa-complete-message p {
+  color: #7A6040;
+}
+
+/* Loading overlay */
+.wa-loading-overlay {
+  background: rgba(245, 240, 230, 0.92);
+}
+.wa-spinner {
+  border-color: rgba(201, 168, 76, 0.18);
+  border-top-color: #C9A84C;
+  box-shadow: none;
+}
+.wa-loading-text {
+  color: #5A4828;
+}
+
+/* ── Tab system ──────────────────────────────────────────────────────── */
+.wa-tab-bar {
+  border-bottom-color: rgba(201, 168, 76, 0.30);
+}
+
+.wa-tab-btn {
+  font-family: 'Lato', sans-serif;
+  color: #9A8060;
+}
+.wa-tab-btn:hover {
+  color: #4A3820;
+}
+.wa-tab-btn.wa-tab-active {
+  color: #C9A84C;
+  border-bottom-color: #C9A84C;
+}
+/* "For Parents" tab — deeper gold when active */
+.wa-tab-btn:last-child.wa-tab-active {
+  color: #8A6020;
+  border-bottom-color: #8A6020;
+}
+
+/* ── Parent summary content ──────────────────────────────────────────── */
+.wa-parent-label {
+  color: #8A6020;
+}
+.wa-parent-summary-text {
+  background: rgba(201, 168, 76, 0.07);
+  border-left-color: #C9A84C;
+  color: #2A2010;
+}
+.wa-parent-summary-label {
+  color: #8A6020;
+}
+.wa-parent-history-card {
+  background: #EDE8DC;
+  border-color: rgba(201, 168, 76, 0.30);
+}
+
+/* ── History cards ───────────────────────────────────────────────────── */
+.wa-history-card:hover {
+  border-color: #C9A84C;
+  box-shadow: 0 2px 8px rgba(201, 168, 76, 0.2);
+}
+.wa-history-word {
+  color: #8A6020;
+}
+.wa-history-assoc {
+  background: #F5F0E6;
+  border-left-color: rgba(201, 168, 76, 0.40);
+  color: #2A2010;
+}
+.wa-history-summary {
+  background: #F5F0E6;
+  border-left-color: #C9A84C;
+}
+.wa-history-summary-label {
+  color: #8A6020;
+}
+.wa-history-summary-text {
+  color: #5A4828;
+}
+.wa-history-summary-text strong {
+  color: #8A6020;
+}
+
+/* ── Summary screen ──────────────────────────────────────────────────── */
+.wa-assoc-item {
+  background: #EDE8DC;
+  border-left-color: #C9A84C;
+}
+.wa-assoc-number {
+  color: #8A6020;
+}
+.wa-assoc-text {
+  color: #2A2010;
+}
+.wa-word-reminder {
+  background: #EDE8DC;
+  border-color: rgba(201, 168, 76, 0.22);
+  color: #5A4828;
+}
+.wa-word-reminder strong {
+  color: #8A6020;
+}
+.wa-summary-box {
+  background: #EDE8DC;
+  border-color: rgba(201, 168, 76, 0.30);
+  border-left-color: #C9A84C;
+  box-shadow: none;
+}
+.wa-summary-box .wa-section-title {
+  color: #8A6020;
+}
+.wa-summary-text {
+  color: #3A2E18;
+}
+.wa-summary-text strong,
+.wa-summary-text b {
+  color: #8A6020;
+}
+.wa-time-display strong {
+  color: #8A6020;
+}
+.wa-summary-actions {
+  border-top-color: rgba(201, 168, 76, 0.22);
+}
+
+/* ── Word display ────────────────────────────────────────────────────── */
+.wa-word-display {
+  background: #EDE8DC;
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: none;
+}
+.wa-word {
+  color: #8A6020;
+}
+
+/* ── Instructions ────────────────────────────────────────────────────── */
+.wa-instructions {
+  background: #EDE8DC;
+  border-color: rgba(201, 168, 76, 0.22);
+  color: #2A2010;
+}
+.wa-instructions h3 {
+  color: #8A6020;
+}
+.wa-instructions ol {
+  color: #2A2010;
+}
+.wa-instructions strong {
+  color: #C9A84C;
+}
+.wa-instructions em {
+  color: #7A6040;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .wa-tab-btn { font-size: 0.82rem; }
+}
